@@ -225,6 +225,154 @@ from collections import defaultdict
 from torchprofile import profile_macs
 
 
+class RNG:
+    def __init__(self, bits):
+        self.seed = 0
+        self.bits = bits
+        self.idx = 0
+        self.random_numbers = list(range(-2 ** (bits - 1), 2 ** (bits - 1)))
+        random.shuffle(self.random_numbers)
+
+    def step(self):
+        number = self.random_numbers[self.idx]
+        self.idx = (self.idx + 1) % len(self.random_numbers)
+        return number
+
+
+class RNGs:
+    def __init__(self, bits, num_RNGs):
+        self.bits = bits
+        self.num_RNGs = num_RNGs
+        self.rngs = [RNG(bits) for _ in range(num_RNGs)]
+        self.idx = 0
+        self.reverse_idx = 0
+        self.get_norm()
+
+    def get_norm(self):
+        self.norm = {}
+        for i in range(2 ** self.bits):
+            rns = [rng.step() for rng in self.rngs]
+            self.norm[rns[0]] = sum([rn ** 2 for rn in rns]) ** 0.5
+        self.idx = 0
+
+    def step(self):
+        if self.idx % (2 ** self.bits - 1) == 0 and self.idx != 0:
+            self.rngs.append(self.rngs.pop(0))
+
+        self.idx += 1
+        if (self.idx - 1) % (2 ** self.bits - 1) == 0 and self.idx != 1:
+            self.reverse_idx = -((abs(self.reverse_idx) + 1) % self.num_RNGs)
+
+        return [rng.step() for rng in self.rngs]
+
+def direction_de(W):
+    norm_W_c = torch.norm(W, dim=0, keepdim=True)
+
+    V = W / norm_W_c
+
+    m = norm_W_c
+
+    return V, m
+
+
+
+
+def DorefaW(w, bit, percent=0.01):
+
+    scaling = True  # whether to use scaling factor, always true in our case
+    if bit == 1:
+        weight = w.detach()
+        # sign = torch.sign(weight)
+        scale = torch.max(torch.abs(weight))
+        quantized = torch.sign(weight).float()
+        residual = quantized - weight
+        if scaling:
+            w = (w + residual) * scale
+        else:
+            w = w + residual
+
+    elif bit == 2:
+        weight = w.detach()
+        sign = torch.sign(weight)
+        scale = torch.max(torch.abs(weight))
+        quantized = (torch.abs(weight) > scale / 3).float()
+        quantized *= sign
+        residual = quantized - weight
+        if scaling:
+            w = (w + residual) * scale
+        else:
+            w = w + residual
+    else:
+        sign = torch.sign(w)
+        scale = torch.max(torch.abs(w))
+        w = torch.abs(w) / (scale + 1e-9)
+        w = QuantizeW.apply(w, bit, 'fp')
+
+        w = w * scale * sign
+
+    return w
+
+class QuantizeW(Function):
+    @staticmethod
+    def forward(ctx, input, bit, scheme='fp'):
+        ctx.bit = bit
+        # I. fix point:
+        if scheme == 'fp':
+            scale = float(2 ** bit - 1)
+            out = torch.round(input * scale) / scale
+
+        # II. power of 2:
+        elif scheme == 'po2':
+            out = 2 ** torch.round(torch.log2(input)) * (input > 2 ** (-2 ** bit + 1)).float()
+
+        # III. sp2:
+        elif scheme == 'sp2':
+            size = input.size()
+            y = input.reshape(-1)
+
+            centroids = torch.tensor(
+                [0, 2 ** -4, 2 ** -3, 2 ** -4 + 2 ** -3, 2 ** -2, 2 ** -2 + 2 ** -3, 2 ** -1, 2 ** -1 + 2 ** -3,
+                 1]).cuda()
+            mag = y - centroids.reshape(-1, 1)
+
+            minimum = torch.min(torch.abs(mag), dim=0)[1]
+            out = centroids[minimum]
+            out = out.reshape(size)
+        else:
+            raise NotImplementedError
+        return out
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        bit = ctx.bit
+        # bit = 8 - 1
+
+        sign = torch.sign(grad_output)
+        scaling = torch.max(torch.abs(grad_output))
+        gradient = torch.abs(grad_output) / scaling
+
+        scale = float(2 ** bit - 1)
+        near = False
+        if near:  # nearest rounding
+            grad_input = torch.round(gradient * scale) / scale
+        else:  # stochastic rounding
+            """
+            #randtensor = torch.rand(gradient.shape).to(gradient.device) - 0.5  # random tensor in [-0.5,0.5)  (too slow)
+            randtensor = torch.cuda.FloatTensor(gradient.shape).uniform_(-0.5, 0.5).to(gradient.device) # random tensor in [-0.5,0.5)
+            grad_input = torch.round((gradient * scale) + randtensor) / scale
+            # e.g. gradient * scale = 3.3, add random value in [-0.5,0.5)
+            # if random value is in   0.2~0.5 -> 4 (30%)
+            # else                   -0.5~0.2 -> 3 (70%)
+            """
+            # random rounding
+            randtensor = torch.cuda.FloatTensor(gradient.shape).uniform_(0, 1).to(gradient.device)
+            randtensor = torch.round(randtensor) - 0.5  # only have 50% 0.5 and 50% -0.5
+            grad_input = torch.round((gradient * scale) + randtensor) / scale
+            # e.g. gradient * scale = 3.3, add random value (0.5 or -0.5)
+            # if random value is 0.5, 3.3+0.5 = 3.8 -> 4 (50%)
+            # else              -0.5, 3.3-0.5 = 2.8 -> 3 (50%)
+
+        return grad_input * sign * scaling, None, None
 # 
 class DiZO(nn.Module):
     def __init__(self, model, norm_mode, exclude_list=[]) -> None:
