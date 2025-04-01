@@ -72,7 +72,6 @@ from transformers import __version__
 from transformers.configuration_utils import PretrainedConfig
 from transformers.data.data_collator import DataCollator, DataCollatorWithPadding, default_data_collator
 from transformers.debug_utils import DebugOption, DebugUnderflowOverflow
-from transformers.deepspeed import deepspeed_init, is_deepspeed_zero3_enabled
 from transformers.dependency_versions_check import dep_version_check
 from transformers.modelcard import TrainingSummary
 from transformers.modeling_utils import PreTrainedModel, load_sharded_checkpoint, unwrap_model
@@ -81,15 +80,6 @@ from transformers.optimization import Adafactor, get_scheduler
 from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS, is_torch_greater_or_equal_than_1_10, \
     is_torch_less_than_1_11
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
-from transformers.trainer_callback import (
-    CallbackHandler,
-    DefaultFlowCallback,
-    PrinterCallback,
-    ProgressCallback,
-    TrainerCallback,
-    TrainerControl,
-    TrainerState,
-)
 from transformers.trainer_pt_utils import (
     DistributedLengthGroupedSampler,
     DistributedSamplerWithLoop,
@@ -111,32 +101,32 @@ from transformers.trainer_pt_utils import (
     nested_xla_mesh_reduce,
     reissue_pt_warnings,
 )
-from transformers.trainer_utils import (
-    PREFIX_CHECKPOINT_DIR,
-    BestRun,
-    EvalLoopOutput,
-    EvalPrediction,
-    FSDPOption,
-    HPSearchBackend,
-    HubStrategy,
-    IntervalStrategy,
-    PredictionOutput,
-    RemoveColumnsCollator,
-    ShardedDDPOption,
-    TrainerMemoryTracker,
-    TrainOutput,
-    default_compute_objective,
-    default_hp_space,
-    denumpify_detensorize,
-    enable_full_determinism,
-    find_executable_batch_size,
-    get_last_checkpoint,
-    has_length,
-    number_of_arguments,
-    seed_worker,
-    set_seed,
-    speed_metrics,
-)
+# from transformers.trainer_utils import (
+#     PREFIX_CHECKPOINT_DIR,
+#     BestRun,
+#     EvalLoopOutput,
+#     EvalPrediction,
+#     FSDPOption,
+#     HPSearchBackend,
+#     HubStrategy,
+#     IntervalStrategy,
+#     PredictionOutput,
+#     RemoveColumnsCollator,
+#     ShardedDDPOption,
+#     TrainerMemoryTracker,
+#     TrainOutput,
+#     default_compute_objective,
+#     default_hp_space,
+#     denumpify_detensorize,
+#     enable_full_determinism,
+#     find_executable_batch_size,
+#     get_last_checkpoint,
+#     has_length,
+#     number_of_arguments,
+#     seed_worker,
+#     set_seed,
+#     speed_metrics,
+# )
 from transformers.training_args import OptimizerNames, ParallelMode, TrainingArguments
 from transformers.utils import (
     CONFIG_NAME,
