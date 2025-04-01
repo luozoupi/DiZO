@@ -225,7 +225,7 @@ from collections import defaultdict
 from torchprofile import profile_macs
 
 
-# DiZO added
+# 
 class DiZO(nn.Module):
     def __init__(self, model, norm_mode, exclude_list=[]) -> None:
         super().__init__()
@@ -591,7 +591,7 @@ class DiZO(nn.Module):
 
             return pgm_loss
 
-# DiZO added
+# 
 class dizo_trainer():
     def __init__(
             self,
@@ -967,7 +967,7 @@ class OurTrainer(Trainer):
             if param.requires_grad:
                 self.named_parameters_to_optim.append((name, param))
 
-        # DiZO added: exclude the layers do not need projection
+        # : exclude the layers do not need projection
         if self.named_parameters_to_optim[0][0] != 'model.decoder.embed_tokens.weight':
             self.exclude_list = [each for each in list(self.model.state_dict().keys()) if 'lora' not in each]
         else:
@@ -976,7 +976,7 @@ class OurTrainer(Trainer):
                                                                          'self_attn.v_proj.weight' not in name and 'self_attn.k_proj.weight' not in name]
             self.named_parameters_to_optim = self.named_parameters_to_optim[1:]
 
-        # DiZO added: remove the unnecessary parameters to cpu for memory saving
+        # : remove the unnecessary parameters to cpu for memory saving
         if args.enhanced in ['zo', 'fo']:
             self.base_model = copy.deepcopy(self.model)
             for name, param in self.base_model.named_parameters():
@@ -1424,7 +1424,7 @@ class OurTrainer(Trainer):
             z = torch.normal(mean=0, std=1, size=param.data.size(), device=param.data.device, dtype=param.data.dtype)
             param.data = param.data - self._get_learning_rate() * (self.projected_grad * z)
 
-        # DiZO added
+        # 
         if (self.state.global_step + 1) % 50 == 0 and args.enhanced:
             if args.enhanced == 'zo':
                 self.dizo_trainer.dizo_zo_iters(model, base_model=self.base_model)
