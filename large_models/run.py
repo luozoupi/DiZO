@@ -414,7 +414,6 @@ class Framework:
         # Resume training from a last checkpoint
         last_checkpoint = None
         from transformers.trainer_utils import get_last_checkpoint
-        # self.args.resume_from_checkpoint = '/home/qitao/MeZO-main-raw/large_models/result/SST2-opt1p3b-mezo-ft-15000-16-1e-7-1e-3-0'
         if os.path.isdir(self.args.output_dir) and not self.args.overwrite_output_dir:
             last_checkpoint = get_last_checkpoint(self.args.output_dir)
         if last_checkpoint is not None and self.args.resume_from_checkpoint is None:
