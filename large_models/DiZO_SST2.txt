@@ -1,0 +1,9 @@
+mezo-ft-4000-16-1e-6-1e-3-26
+BS: 16
+LR: 1e-6
+EPS: 1e-3
+SEED: 26
+TRAIN/EVAL STEPS: 4000/500
+MODE: ft
+Extra args:  
+{'train_runtime': 2978.1777, 'train_samples_per_second': 21.49, 'train_steps_per_second': 1.343, 'train_loss': 0.32674795532226564, 'epoch': 63.49}

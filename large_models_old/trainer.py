@@ -41,87 +41,21 @@ from transformers import Trainer
 from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticRegressionCV
 from collections import deque
 
-# # Integrations must be imported before ML frameworks:
-# from transformers.integrations import (  # isort: split
-#     default_hp_search_backend,
-#     get_reporting_integration_callbacks,
-#     hp_params,
-#     is_fairscale_available,
-#     is_optuna_available,
-#     is_ray_tune_available,
-#     is_sigopt_available,
-#     is_wandb_available,
-#     run_hp_search_optuna,
-#     run_hp_search_ray,
-#     run_hp_search_sigopt,
-#     run_hp_search_wandb,
-# )
-
-# NEW (compatible with current Transformers):
-try:
-    from transformers.integrations import get_reporting_integration_callbacks
-except ImportError:
-    # Fallback for very new versions
-    def get_reporting_integration_callbacks():
-        return []
-
-# Import these from their new locations or provide fallbacks
-try:
-    from transformers.utils import (
-        is_optuna_available,
-        is_wandb_available,
-    )
-except ImportError:
-    def is_optuna_available():
-        try:
-            import optuna
-            return True
-        except ImportError:
-            return False
-    
-    def is_wandb_available():
-        try:
-            import wandb
-            return True
-        except ImportError:
-            return False
-
-# Fallback functions for removed integrations
-def is_fairscale_available():
-    try:
-        import fairscale
-        return True
-    except ImportError:
-        return False
-
-def is_ray_tune_available():
-    try:
-        import ray
-        return True
-    except ImportError:
-        return False
-
-def is_sigopt_available():
-    try:
-        import sigopt
-        return True
-    except ImportError:
-        return False
-
-# Fallback stubs for removed functions (keep these as before)
-def hp_params(trial):
-    """Fallback for removed hp_params function"""
-    try:
-        return trial.params if hasattr(trial, "params") else {}
-    except Exception:
-        return {}
-
-# Stub for removed symbols
-default_hp_search_backend = None
-run_hp_search_optuna = None
-run_hp_search_ray = None  
-run_hp_search_sigopt = None
-run_hp_search_wandb = None
+# Integrations must be imported before ML frameworks:
+from transformers.integrations import (  # isort: split
+    default_hp_search_backend,
+    get_reporting_integration_callbacks,
+    hp_params,
+    is_fairscale_available,
+    is_optuna_available,
+    is_ray_tune_available,
+    is_sigopt_available,
+    is_wandb_available,
+    run_hp_search_optuna,
+    run_hp_search_ray,
+    run_hp_search_sigopt,
+    run_hp_search_wandb,
+)
 
 import numpy as np
 import torch
@@ -131,7 +65,6 @@ from torch import nn
 from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
 from torch.amp import autocast
-from torch.autograd import Function
 
 from huggingface_hub import Repository
 
@@ -144,74 +77,30 @@ from transformers.modelcard import TrainingSummary
 from transformers.modeling_utils import PreTrainedModel, load_sharded_checkpoint, unwrap_model
 from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES, MODEL_MAPPING_NAMES
 from transformers.optimization import Adafactor, get_scheduler
-    
+from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS, is_torch_greater_or_equal_than_1_10, \
+    is_torch_less_than_1_11
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
-
-from transformers.trainer_utils import (
-    PREFIX_CHECKPOINT_DIR,
-    EvalLoopOutput,
-    EvalPrediction, 
-    TrainOutput,
-    speed_metrics,
-    has_length,
+from transformers.trainer_pt_utils import (
+    DistributedLengthGroupedSampler,
+    DistributedSamplerWithLoop,
+    DistributedTensorGatherer,
+    IterableDatasetShard,
+    LabelSmoother,
+    LengthGroupedSampler,
+    SequentialDistributedSampler,
+    ShardSampler,
+    distributed_broadcast_scalars,
+    distributed_concat,
+    find_batch_size,
+    get_module_class_from_name,
+    get_parameter_names,
+    nested_concat,
+    nested_detach,
+    nested_numpify,
+    nested_truncate,
+    nested_xla_mesh_reduce,
+    reissue_pt_warnings,
 )
-
-# Try to import TrainerState, if not available create a simple fallback
-try:
-    from transformers.trainer_utils import TrainerState
-except ImportError:
-    from transformers.trainer_callback import TrainerState
-
-# Try to import trainer callback classes
-try:
-    from transformers.trainer_callback import (
-        DefaultFlowCallback,
-        ProgressCallback,
-    )
-except ImportError:
-    # Fallback if these are not available
-    DefaultFlowCallback = None
-    ProgressCallback = None
-# NEW (compatible with Transformers 4.52.4):
-from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
-
-# Create our own version check functions
-import torch
-from packaging import version
-
-def is_torch_greater_or_equal_than_1_10():
-    return version.parse(torch.__version__) >= version.parse("1.10.0")
-
-def is_torch_less_than_1_11():
-    return version.parse(torch.__version__) < version.parse("1.11.0")
-try:
-    from transformers.trainer_pt_utils import IterableDatasetShard
-except ImportError:
-    # Fallback stub so isinstance(..., IterableDatasetShard) won’t crash
-    class IterableDatasetShard:
-        pass
-
-# from transformers.trainer_pt_utils import (
-#     DistributedLengthGroupedSampler,
-#     DistributedSamplerWithLoop,
-#     DistributedTensorGatherer,
-#     IterableDatasetShard,
-#     LabelSmoother,
-#     LengthGroupedSampler,
-#     SequentialDistributedSampler,
-#     ShardSampler,
-#     distributed_broadcast_scalars,
-#     distributed_concat,
-#     find_batch_size,
-#     get_module_class_from_name,
-#     get_parameter_names,
-#     nested_concat,
-#     nested_detach,
-#     nested_numpify,
-#     nested_truncate,
-#     nested_xla_mesh_reduce,
-#     reissue_pt_warnings,
-# )
 # from transformers.trainer_utils import (
 #     PREFIX_CHECKPOINT_DIR,
 #     BestRun,
@@ -239,15 +128,6 @@ except ImportError:
 #     speed_metrics,
 # )
 from transformers.training_args import OptimizerNames, ParallelMode, TrainingArguments
-
-try:
-    from transformers.trainer_utils import ShardedDDPOption
-except Exception:
-    class ShardedDDPOption:
-        SIMPLE = "simple"
-        ZERO_DP_2 = "zero_dp_2"
-        ZERO_DP_3 = "zero_dp_3"
-
 from transformers.utils import (
     CONFIG_NAME,
     WEIGHTS_INDEX_NAME,
@@ -261,20 +141,10 @@ from transformers.utils import (
     is_sagemaker_dp_enabled,
     is_sagemaker_mp_enabled,
     is_torch_tensorrt_fx_available,
+    is_torch_tpu_available,
     is_torchdynamo_available,
     logging,
 )
-
-# Fallback for is_torch_tpu_available
-def is_torch_tpu_available(check_device=True):
-    try:
-        import torch_xla
-        import torch_xla.core.xla_model as xm
-        if check_device:
-            return xm.xla_device() is not None
-        return True
-    except ImportError:
-        return False
 from transformers.utils.generic import ContextManagers
 from scipy.special import loggamma
 
@@ -297,6 +167,7 @@ if is_apex_available():
 
 if is_datasets_available():
     import datasets
+import torch.optim as optim
 
 if is_torch_tpu_available(check_device=False):
     import torch_xla.core.xla_model as xm
@@ -338,11 +209,11 @@ SCHEDULER_NAME = "scheduler.pt"
 SCALER_NAME = "scaler.pt"
 
 from tasks import get_task
-from tasks import get_task
 import torch.nn.functional as F
 from metrics import calculate_metric
 from collections import defaultdict
-# from torchprofile import profile_macs  # Optional dependency
+from torchprofile import profile_macs
+
 
 class RNG:
     def __init__(self, bits):
@@ -504,12 +375,7 @@ class DiZO(nn.Module):
         self.id_name_map = {}
         self.create_contraint(model)  # Create constraint place holders
         self.constraints = nn.ParameterList(self.constraints)
-        # Put constraints on same device as the reference model (avoid assuming cuda:0)
-        try:
-            model_device = next(model.parameters()).device
-        except StopIteration:
-            model_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.constraints = self.constraints.to(model_device)
+        self.constraints = self.constraints.to('cuda')
         self.init = True
         self.times = 0
         self.alpha = {}
@@ -730,20 +596,9 @@ class DiZO(nn.Module):
                 grad = (loss1 - loss2) / (2 * zo_eps)
 
                 for i, (name, gamma) in enumerate(self.constraints.named_parameters()):
-                    # Ensure all operands are on same device as gamma
+
                     tmp_z = zs[name]
-                    if isinstance(ts[i], torch.Tensor):
-                        tsi = ts[i].to(gamma.device)
-                    else:
-                        tsi = torch.tensor(ts[i], device=gamma.device, dtype=gamma.dtype)
-                    grad_t = grad.to(gamma.device) if isinstance(grad, torch.Tensor) else torch.tensor(grad, device=gamma.device, dtype=gamma.dtype)
-                    tmp_z_t = tmp_z.to(gamma.device) if isinstance(tmp_z, torch.Tensor) else torch.tensor(tmp_z, device=gamma.device, dtype=gamma.dtype)
-                    tau_t = torch.as_tensor(tau, device=gamma.device, dtype=gamma.dtype)
-                    step_size_t = torch.as_tensor(step_size, device=gamma.device, dtype=gamma.dtype)
-                    lower = (1 - tau_t) * tsi
-                    upper = (1 + tau_t) * tsi
-                    update = gamma.data - step_size_t * tsi * grad_t * tmp_z_t
-                    gamma.data = torch.clamp(update, min=lower, max=upper)
+                    gamma.data = torch.clip(gamma.data - step_size * ts[i] * grad * tmp_z, (1 - tau) * ts[i], (1 + tau) * ts[i])
 
             self.ts = ts
 
@@ -965,17 +820,8 @@ class dizo_trainer():
 
 
 class OurTrainer(Trainer):
-
     from transformers.trainer_pt_utils import _get_learning_rate, log_metrics, metrics_format, save_metrics, save_state
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Ensure attributes exist even if HF internals skipped setting them
-        if not hasattr(self, "sharded_ddp"):
-            self.sharded_ddp = None
-        if not hasattr(self, "fsdp"):
-            self.fsdp = None
-            
     def _inner_training_loop(
             self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
@@ -1113,14 +959,13 @@ class OurTrainer(Trainer):
             else:
                 debug_overflow = DebugUnderflowOverflow(self.model)  # noqa
 
-        sharded_mode = getattr(self, "sharded_ddp", None)
-        fsdp_mode = getattr(self, "fsdp", None)
         delay_optimizer_creation = (
-            (sharded_mode is not None and sharded_mode != getattr(ShardedDDPOption, "SIMPLE", "simple"))
-            or is_sagemaker_mp_enabled()
-            or fsdp_mode is not None
+                self.sharded_ddp is not None
+                and self.sharded_ddp != ShardedDDPOption.SIMPLE
+                or is_sagemaker_mp_enabled()
+                or self.fsdp is not None
         )
-        
+
         if args.deepspeed:
             deepspeed_engine, optimizer, lr_scheduler = deepspeed_init(
                 self, num_training_steps=max_steps, resume_from_checkpoint=resume_from_checkpoint
@@ -1215,10 +1060,8 @@ class OurTrainer(Trainer):
             # use self._trial because the SigOpt/Optuna hpo only call `_hp_search_setup(trial)` instead of passing trial
             # parameter to Train when using DDP.
             self.state.trial_name = self.hp_name(self._trial)
-        # With this:
         if trial is not None:
-            # Remove HPSearchBackend dependency 
-            assignments = trial.assignments if hasattr(trial, 'assignments') else trial
+            assignments = trial.assignments if self.hp_search_backend == HPSearchBackend.SIGOPT else trial
             self.state.trial_params = hp_params(assignments)
         else:
             self.state.trial_params = None
@@ -1445,11 +1288,10 @@ class OurTrainer(Trainer):
                             os.makedirs(path)
                         np.save(path + '/' + 'loss_list_seed_{}.npy'.format(args.seed), self.loss_list)
                         predictions = []
-                        source_eval_samples = getattr(self, 'raw_eval_samples', None)
-                        if source_eval_samples is None:
-                            source_eval_samples = self.eval_dataset
-                        for eval_sample in source_eval_samples:
-                            predictions.append(self.one_step_pred([], eval_sample, verbose=False))
+                        for eval_sample in self.eval_dataset:
+                            predictions.append(
+                                self.one_step_pred([], eval_sample, verbose=False)
+                            )
                         metric_name = getattr(self.task, "metric_name", "accuracy")
                         metrics = {metric_name: calculate_metric(predictions, metric_name)}
                         metrics["global_step"] = self.state.global_step
@@ -1762,20 +1604,11 @@ class OurTrainer(Trainer):
             if IS_SAGEMAKER_MP_POST_1_10:
                 # 'user_content.pt' indicates model state_dict saved with smp >= 1.10
                 Path(os.path.join(output_dir, "user_content.pt")).touch()
-        if (
-            hasattr(self.args, "sharded_ddp")
-            and isinstance(self.args.sharded_ddp, (list, tuple))
-            and (
-                getattr(ShardedDDPOption, "ZERO_DP_2", "zero_dp_2") in self.args.sharded_ddp
-                or getattr(ShardedDDPOption, "ZERO_DP_3", "zero_dp_3") in self.args.sharded_ddp
-            )
-        ) or getattr(self, "fsdp", None) is not None:
-            from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, StateDictType, FullStateDictConfig
-            full_state_dict_config = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
-            with FSDP.state_dict_type(self.model, StateDictType.FULL_STATE_DICT, full_state_dict_config):
-                state_dict = self.model.state_dict()
-            if self.args.should_save:
-                self._save(output_dir, state_dict=state_dict)
+        elif (
+                ShardedDDPOption.ZERO_DP_2 in self.args.sharded_ddp
+                or ShardedDDPOption.ZERO_DP_3 in self.args.sharded_ddp
+                or self.fsdp is not None
+        ):
             from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, StateDictType, FullStateDictConfig
             full_state_dict_config = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
 

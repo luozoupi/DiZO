@@ -8,7 +8,6 @@ logger.setLevel(logging.INFO)
 import argparse
 import time
 import tasks
-import warnings
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, Trainer, HfArgumentParser, Trainer, \
     TrainingArguments, DataCollatorWithPadding, DataCollatorForTokenClassification
 from typing import Union, Optional
@@ -26,140 +25,103 @@ from metrics import calculate_metric
 from utils import *
 from trainer import OurTrainer
 import random
+import copy
 from torch import nn
 from dataset import FewShotDataset, OurInputFeatures
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-# Suppress repeated deprecation warning from newer Transformers versions
-warnings.filterwarnings(
-    "once",
-    category=FutureWarning,
-    message=r"Trainer.tokenizer is now deprecated.*",
-)
-
-
-from dataclasses import dataclass, field
-from transformers.training_args import IntervalStrategy
 
 @dataclass
 class OurArguments(TrainingArguments):
-    # ---- Scheduling / strategy (must be first so we can normalize before parent __post_init__) ----
-    eval_strategy: Union[str, IntervalStrategy] = "steps"
-    evaluation_strategy: Union[str, IntervalStrategy] = "steps"
-    save_strategy: Union[str, IntervalStrategy] = "steps"
-    load_best_model_at_end: bool = True
+    # dataset and sampling strategy
+    task_name: str = "SST2"  # task name should match the string before Dataset in the Dataset class name. We support the following task_name: SST2, RTE, CB, BoolQ, WSC, WIC, MultiRC, Copa, ReCoRD, SQuAD, DROP
 
-    # ---- Core dataset / task ----
-    task_name: str = "SST2"
-    num_train: int = 0
-    num_dev: Optional[int] = None
-    num_eval: Optional[int] = None
-    num_train_sets: Optional[int] = None
-    train_set_seed: Optional[int] = None
-    result_file: Optional[str] = None
+    # Number of examples
+    num_train: int = 0  # ICL mode: number of demonstrations; training mode: number of training samples
+    num_dev: int = None  # (only enabled with training) number of development samples
+    num_eval: int = None  # number of evaluation samples
+    num_train_sets: int = None  # how many sets of training samples/demos to sample; if None and train_set_seed is None, then we will sample one set for each evaluation sample
+    train_set_seed: int = None  # designated seed to sample training samples/demos
+    result_file: str = None  # file name for saving performance; if None, then use the task name, model name, and config
 
-    # ---- Model loading ----
-    model_name: str = "facebook/opt-1.3b"
-    load_float16: bool = False
-    load_bfloat16: bool = False
-    load_int8: bool = False
-    max_length: int = 2048
-    no_auto_device: bool = False
+    # Model loading
+    model_name: str = "./opt1p3b"  # HuggingFace model name
+    load_float16: bool = False  # load model parameters as float16
+    load_bfloat16: bool = False  # load model parameters as bfloat16
+    load_int8: bool = False  # load model parameters as int8
+    max_length: int = 2048  # max length the model can take
+    no_auto_device: bool = False  # do not load model by auto device; should turn this on when using FSDP
 
-    # ---- Calibration ----
-    sfc: bool = False
-    icl_sfc: bool = False
+    # Calibration
+    sfc: bool = False  # whether to use SFC calibration
+    icl_sfc: bool = False  # whether to use SFC calibration for ICL samples
 
-    # ---- Training style ----
-    trainer: str = "none"              # none | regular | zo
-    only_train_option: bool = True
-    train_as_classification: bool = False
-    head_tuning: bool = False
-    linear_probing: bool = False
-    lp_early_stopping: bool = False
-    untie_emb: bool = False
+    # Training
+    trainer: str = "none"
+    ## options
+    ## - none: no training -- for zero-shot or in-context learning (ICL)
+    ## - regular: regular huggingface trainer -- for fine-tuning
+    ## - zo: zeroth-order (MeZO) training
+    only_train_option: bool = True  # whether to only train the option part of the input
+    train_as_classification: bool = False  # take the log likelihood of all options and train as classification
 
-    # ---- MeZO (ZO) ----
-    zo_eps: float = 1e-3
+    # MeZO
+    zo_eps: float = 1e-3  # eps in MeZO
     bits: int = 11
     rng: int = 8
     pre_gen: bool = False
     handling: bool = False
     size: float = 0.9
-    enhanced: Optional[str] = None
+    enhanced: str = None
 
-    # ---- Prefix tuning ----
-    prefix_tuning: bool = False
-    num_prefix: int = 5
-    no_reparam: bool = True
-    prefix_init_by_real_act: bool = True
+    # Prefix tuning
+    prefix_tuning: bool = False  # whether to use prefix tuning
+    num_prefix: int = 5  # number of prefixes to use
+    no_reparam: bool = True  # do not use reparameterization trick
+    prefix_init_by_real_act: bool = True  # initialize prefix by real activations of random words
 
-    # ---- LoRA ----
-    lora: bool = False
-    lora_alpha: int = 16
-    lora_r: int = 8
+    # LoRA
+    lora: bool = False  # whether to use LoRA
+    lora_alpha: int = 16  # alpha in LoRA
+    lora_r: int = 8  # r in LoRA
 
-    # ---- Generation ----
-    sampling: bool = False
-    temperature: float = 1.0
-    num_beams: int = 1
-    top_k: Optional[int] = None
-    top_p: float = 0.95
-    max_new_tokens: int = 50
-    eos_token: str = "\n"
+    # Generation
+    sampling: bool = False  # whether to use sampling
+    temperature: float = 1.0  # temperature for generation
+    num_beams: int = 1  # number of beams for generation
+    top_k: int = None  # top-k for generation
+    top_p: float = 0.95  # top-p for generation
+    max_new_tokens: int = 50  # max number of new tokens to generate
+    eos_token: str = "\n"  # end of sentence token
 
-    # ---- Saving / eval control ----
-    save_model: bool = False
-    no_eval: bool = False
-    tag: str = ""
-    save_on_interrupt: bool = False
+    # Saving
+    save_model: bool = False  # whether to save the model
+    no_eval: bool = False  # whether to skip evaluation
+    tag: str = ""  # saving tag
 
-    # ---- Non-diff objective ----
-    non_diff: bool = False
+    # Linear probing
+    linear_probing: bool = False  # whether to do linear probing
+    lp_early_stopping: bool = False  # whether to do early stopping in linear probing
+    head_tuning: bool = False  # head tuning: only tune the LM head
 
-    # ---- Display / debug ----
-    verbose: bool = False
+    # Untie emb/lm_head weights
+    untie_emb: bool = False  # untie the embeddings and LM head
 
-    # (Any additional future custom fields go here)
+    # Display
+    verbose: bool = False  # verbose output
 
-    def __post_init__(self):
-        # Normalize strategies BEFORE parent validation
-        def _to_interval(v):
-            if isinstance(v, IntervalStrategy):
-                return v
-            if isinstance(v, str):
-                return IntervalStrategy(v)
-            return IntervalStrategy.NO
+    # Non-diff objective
+    non_diff: bool = False  # use non-differentiable objective (only support F1 for SQuAD for now)
 
-        self.eval_strategy = _to_interval(self.eval_strategy)
-        self.evaluation_strategy = _to_interval(self.evaluation_strategy)
-
-        # Sync aliases
-        if self.evaluation_strategy == IntervalStrategy.NO and self.eval_strategy != IntervalStrategy.NO:
-            self.evaluation_strategy = self.eval_strategy
-        if self.eval_strategy == IntervalStrategy.NO and self.evaluation_strategy != IntervalStrategy.NO:
-            self.eval_strategy = self.evaluation_strategy
-
-        # Enforce when loading best model
-        if self.load_best_model_at_end and (
-            self.evaluation_strategy == IntervalStrategy.NO or self.eval_strategy == IntervalStrategy.NO
-        ):
-            self.evaluation_strategy = self.eval_strategy = IntervalStrategy.STEPS
-
-        if self.load_best_model_at_end:
-            self.save_strategy = self.evaluation_strategy
-
-        super().__post_init__()
+    # Auto saving when interrupted
+    save_on_interrupt: bool = False  # save model when interrupted (useful for long training)
 
 
 def parse_args():
+    parser = argparse.ArgumentParser()
     parser = HfArgumentParser(OurArguments)
     args = parser.parse_args_into_dataclasses()[0]
-    # Safety harmonization
-    if args.load_best_model_at_end and args.save_strategy != args.evaluation_strategy:
-        print(f"[auto-fix] aligning save_strategy {args.save_strategy} -> {args.evaluation_strategy}")
-        args.save_strategy = args.evaluation_strategy
     return args
 
 
@@ -440,20 +402,12 @@ class Framework:
             model=self.model,
             args=self.args,
             train_dataset=train_dataset,
-            eval_dataset=eval_dataset,  # pass the constructed HF dataset, not raw list
-            tokenizer=self.tokenizer,   # still pass for backward compat; we'll alias to processing_class
+            eval_dataset=eval_samples,
+            tokenizer=self.tokenizer,
             data_collator=DataCollatorWithPaddingAndNesting(self.tokenizer,
                                                             pad_to_multiple_of=8) if self.args.train_as_classification else collator(
                 self.tokenizer, pad_to_multiple_of=8),
         )
-        # Keep original evaluation samples (raw objects) for in-loop evaluation avoiding field loss
-        trainer.raw_eval_samples = eval_samples
-        # Forward-compatible: set processing_class and override tokenizer attribute to avoid future accesses hitting deprecated property
-        try:
-            trainer.processing_class = getattr(trainer, 'processing_class', self.tokenizer) or self.tokenizer
-            trainer.__dict__['tokenizer'] = self.tokenizer
-        except Exception:
-            pass
         if self.args.save_on_interrupt:
             trainer.add_callback(SIGUSR1Callback())
 
