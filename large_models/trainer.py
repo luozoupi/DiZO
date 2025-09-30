@@ -43,10 +43,8 @@ from collections import deque
 
 # Integrations must be imported before ML frameworks:
 from transformers.integrations import (  # isort: split
-    default_hp_search_backend,
     get_reporting_integration_callbacks,
     hp_params,
-    is_fairscale_available,
     is_optuna_available,
     is_ray_tune_available,
     is_sigopt_available,
@@ -55,13 +53,26 @@ from transformers.integrations import (  # isort: split
     run_hp_search_ray,
     run_hp_search_sigopt,
     run_hp_search_wandb,
+    is_deepspeed_zero3_enabled,
+    deepspeed_init,
 )
+
+from transformers.hyperparameter_search import default_hp_search_backend
+
+# Define is_fairscale_available function since it's no longer in transformers.integrations
+def is_fairscale_available():
+    try:
+        import fairscale
+        return True
+    except ImportError:
+        return False
 
 import numpy as np
 import torch
 import torch.distributed as dist
 from packaging import version
 from torch import nn
+from torch.autograd import Function
 from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
 from torch.amp import autocast
@@ -77,8 +88,7 @@ from transformers.modelcard import TrainingSummary
 from transformers.modeling_utils import PreTrainedModel, load_sharded_checkpoint, unwrap_model
 from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES, MODEL_MAPPING_NAMES
 from transformers.optimization import Adafactor, get_scheduler
-from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS, is_torch_greater_or_equal_than_1_10, \
-    is_torch_less_than_1_11
+from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS, is_torch_greater_or_equal
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.trainer_pt_utils import (
     DistributedLengthGroupedSampler,
@@ -141,10 +151,12 @@ from transformers.utils import (
     is_sagemaker_dp_enabled,
     is_sagemaker_mp_enabled,
     is_torch_tensorrt_fx_available,
-    is_torch_tpu_available,
     is_torchdynamo_available,
     logging,
 )
+from transformers.pytorch_utils import is_torch_xla_available as is_torch_tpu_available
+from transformers.trainer_callback import DefaultFlowCallback, ProgressCallback, TrainerState
+from transformers.trainer_utils import has_length, TrainOutput, speed_metrics, HPSearchBackend
 from transformers.utils.generic import ContextManagers
 from scipy.special import loggamma
 
@@ -152,7 +164,7 @@ from transformers.modeling_outputs import CausalLMOutputWithPast
 from torch.nn import CrossEntropyLoss
 from torch.optim.lr_scheduler import LambdaLR
 
-_is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
+_is_native_cpu_amp_available = is_torch_greater_or_equal("1.10")
 
 DEFAULT_CALLBACKS = [DefaultFlowCallback]
 DEFAULT_PROGRESS_CALLBACK = ProgressCallback
@@ -169,7 +181,7 @@ if is_datasets_available():
     import datasets
 import torch.optim as optim
 
-if is_torch_tpu_available(check_device=False):
+if is_torch_tpu_available():
     import torch_xla.core.xla_model as xm
     import torch_xla.debug.metrics as met
     import torch_xla.distributed.parallel_loader as pl
@@ -212,7 +224,6 @@ from tasks import get_task
 import torch.nn.functional as F
 from metrics import calculate_metric
 from collections import defaultdict
-from torchprofile import profile_macs
 
 
 class RNG:
@@ -822,6 +833,11 @@ class dizo_trainer():
 class OurTrainer(Trainer):
     from transformers.trainer_pt_utils import _get_learning_rate, log_metrics, metrics_format, save_metrics, save_state
 
+    @property
+    def tokenizer(self):
+        """Backward compatibility property for accessing tokenizer via processing_class"""
+        return getattr(self, 'processing_class', None)
+
     def _inner_training_loop(
             self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
@@ -839,10 +855,30 @@ class OurTrainer(Trainer):
         if self.args.linear_probing:
 
             def _get_token_prediction_layer(model):
+                # Enhanced model support for token prediction layer
                 if model.config.model_type == "opt":
                     return model.lm_head
+                elif model.config.model_type in ["gpt2", "gpt"]:
+                    return model.lm_head
+                elif model.config.model_type in ["llama", "llama2", "llama3"]:
+                    return model.lm_head
+                elif model.config.model_type in ["qwen", "qwen2"]:
+                    return model.lm_head
+                elif model.config.model_type in ["mistral", "mixtral"]:
+                    return model.lm_head
+                elif model.config.model_type == "falcon":
+                    return model.lm_head
+                elif model.config.model_type in ["roberta", "bert"]:
+                    # For classification models
+                    return model.classifier if hasattr(model, 'classifier') else model.lm_head
                 else:
-                    raise NotImplementedError(model.config.model_type)
+                    # Default fallback
+                    if hasattr(model, 'lm_head'):
+                        return model.lm_head
+                    elif hasattr(model, 'classifier'):
+                        return model.classifier
+                    else:
+                        raise NotImplementedError(f"Model type {model.config.model_type} not supported for linear probing")
 
             def _extract_features(model, *args, **kwargs):
                 """some magic for getting features pre last layer"""
@@ -879,11 +915,20 @@ class OurTrainer(Trainer):
 
             features = torch.cat(features, dim=0).cpu().numpy()
             targets = torch.cat(targets, dim=0).cpu().numpy()
-            # Whether to use bias
-            if self.model.config.model_type in ["opt", "gpt2"]:
+            # Enhanced bias handling for different model types
+            if self.model.config.model_type in ["opt", "gpt2", "gpt"]:
                 use_bias = False
+            elif self.model.config.model_type in ["llama", "llama2", "llama3", "mistral", "mixtral"]:
+                use_bias = False  # Llama-style models typically don't use bias
+            elif self.model.config.model_type in ["qwen", "qwen2"]:
+                use_bias = False  # Qwen models typically don't use bias
+            elif self.model.config.model_type == "falcon":
+                use_bias = False  # Falcon models typically don't use bias
+            elif self.model.config.model_type in ["roberta", "bert"]:
+                use_bias = True   # BERT-style models use bias
             else:
-                raise NotImplementedError
+                use_bias = False  # Default to no bias for unknown models
+                logger.warning(f"Unknown model type {self.model.config.model_type}, defaulting to use_bias=False")
             # Set early stopping
             tol = 0.01 if self.args.lp_early_stopping else 1e-4  # 1e-4 is scipy default
             max_iter = 1000 if self.args.lp_early_stopping else 5000
@@ -960,10 +1005,10 @@ class OurTrainer(Trainer):
                 debug_overflow = DebugUnderflowOverflow(self.model)  # noqa
 
         delay_optimizer_creation = (
-                self.sharded_ddp is not None
-                and self.sharded_ddp != ShardedDDPOption.SIMPLE
+                hasattr(self.args, 'sharded_ddp') and self.args.sharded_ddp is not None
+                and self.args.sharded_ddp != "simple"
                 or is_sagemaker_mp_enabled()
-                or self.fsdp is not None
+                or hasattr(self, 'fsdp') and self.fsdp is not None
         )
 
         if args.deepspeed:
@@ -1089,7 +1134,7 @@ class OurTrainer(Trainer):
                 is_random_sampler = hasattr(train_dataloader, "sampler") and isinstance(
                     train_dataloader.sampler, RandomSampler
                 )
-                if is_torch_less_than_1_11 or not is_random_sampler:
+                if not is_torch_greater_or_equal("1.11") or not is_random_sampler:
                     # We just need to begin an iteration to create the randomization of the sampler.
                     # That was before PyTorch 1.11 however...
                     for _ in train_dataloader:
@@ -1605,9 +1650,9 @@ class OurTrainer(Trainer):
                 # 'user_content.pt' indicates model state_dict saved with smp >= 1.10
                 Path(os.path.join(output_dir, "user_content.pt")).touch()
         elif (
-                ShardedDDPOption.ZERO_DP_2 in self.args.sharded_ddp
-                or ShardedDDPOption.ZERO_DP_3 in self.args.sharded_ddp
-                or self.fsdp is not None
+                hasattr(self.args, 'sharded_ddp') and self.args.sharded_ddp is not None
+                and ("zero_dp_2" in str(self.args.sharded_ddp) or "zero_dp_3" in str(self.args.sharded_ddp))
+                or hasattr(self, 'fsdp') and self.fsdp is not None
         ):
             from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, StateDictType, FullStateDictConfig
             full_state_dict_config = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)

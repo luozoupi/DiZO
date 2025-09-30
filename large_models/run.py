@@ -183,6 +183,44 @@ class Framework:
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
+        
+        # Universal tokenizer padding fix for all model types
+        if tokenizer.pad_token is None:
+            # Set pad_token based on model type for better compatibility
+            if hasattr(model.config, 'model_type'):
+                model_type = model.config.model_type.lower()
+                if model_type in ['gpt2', 'gpt', 'openai-gpt']:
+                    # GPT models: use eos_token as pad_token
+                    tokenizer.pad_token = tokenizer.eos_token
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+                elif model_type in ['llama', 'llama2', 'llama3', 'mistral', 'mixtral']:
+                    # Llama-style models: use eos_token as pad_token
+                    tokenizer.pad_token = tokenizer.eos_token
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+                elif model_type in ['qwen', 'qwen2']:
+                    # Qwen models: handle special case
+                    if hasattr(tokenizer, 'im_end_token'):
+                        tokenizer.pad_token = tokenizer.im_end_token
+                        tokenizer.pad_token_id = tokenizer.im_end_token_id
+                    else:
+                        tokenizer.pad_token = tokenizer.eos_token
+                        tokenizer.pad_token_id = tokenizer.eos_token_id
+                elif model_type in ['falcon']:
+                    # Falcon models
+                    tokenizer.pad_token = tokenizer.eos_token
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+                else:
+                    # Default fallback for any other model
+                    tokenizer.pad_token = tokenizer.eos_token
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+            else:
+                # Fallback if model_type is not available
+                tokenizer.pad_token = tokenizer.eos_token
+                tokenizer.pad_token_id = tokenizer.eos_token_id
+        
+        # Ensure pad_token_id is set correctly
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token_id = tokenizer.eos_token_id if tokenizer.eos_token_id is not None else 0
 
         # HF tokenizer bug fix
         if "opt" in self.args.model_name:
@@ -202,10 +240,24 @@ class Framework:
             LoRA(model, r=self.args.lora_r, alpha=self.args.lora_alpha, float16=self.args.load_float16)
 
         if self.args.head_tuning:
+            # Enhanced model support for head tuning
             if model.config.model_type == "opt":
                 head_name = "lm_head" if self.args.untie_emb else "embed_tokens"
+            elif model.config.model_type in ["gpt2", "gpt"]:
+                head_name = "lm_head" if self.args.untie_emb else "wte"
+            elif model.config.model_type in ["llama", "llama2", "llama3"]:
+                head_name = "lm_head" if self.args.untie_emb else "embed_tokens"
+            elif model.config.model_type in ["qwen", "qwen2"]:
+                head_name = "lm_head" if self.args.untie_emb else "embed_tokens"
+            elif model.config.model_type in ["mistral", "mixtral"]:
+                head_name = "lm_head" if self.args.untie_emb else "embed_tokens"
+            elif model.config.model_type == "falcon":
+                head_name = "lm_head" if self.args.untie_emb else "word_embeddings"
             else:
-                raise NotImplementedError
+                # Default fallback for unknown models
+                head_name = "lm_head" if self.args.untie_emb else "embed_tokens"
+                print(f"Warning: Unknown model type {model.config.model_type}, using default head_name: {head_name}")
+            
             for n, p in model.named_parameters():
                 if head_name not in n:
                     p.requires_grad = False
@@ -403,7 +455,7 @@ class Framework:
             args=self.args,
             train_dataset=train_dataset,
             eval_dataset=eval_samples,
-            tokenizer=self.tokenizer,
+            processing_class=self.tokenizer,
             data_collator=DataCollatorWithPaddingAndNesting(self.tokenizer,
                                                             pad_to_multiple_of=8) if self.args.train_as_classification else collator(
                 self.tokenizer, pad_to_multiple_of=8),
