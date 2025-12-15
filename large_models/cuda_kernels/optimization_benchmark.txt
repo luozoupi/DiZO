@@ -1,0 +1,37 @@
+[INFO] CUDA extension loaded successfully
+================================================================================
+TRITON vs CUDA FUSED PERTURBATION KERNEL COMPARISON
+================================================================================
+Elements: 331,196,416 (1263.4 MB)
+Iterations: 100, Warmup: 10
+Device: NVIDIA H200
+
+--- Triton Kernels ---
+Testing V1 Basic (BLOCK=1024)...
+  Time: 1.590 ms
+Testing V2 Optimized (BLOCK=2048)...
+  Time: 1.594 ms
+Testing Autotuned...
+  Time: 1.581 ms
+Testing V6 Optimized...
+  Time: 1.580 ms
+
+--- CUDA Extension ---
+Testing CUDA Extension...
+  Time: 0.692 ms
+
+--- PyTorch Baseline ---
+Testing PyTorch Baseline...
+  Time: 1.619 ms
+
+================================================================================
+SUMMARY
+================================================================================
+Kernel                            Time (ms)    Speedup    vs Best
+--------------------------------------------------------------
+CUDA Extension                        0.692      2.34x      1.00x ★
+Triton V6 Optimized                   1.580      1.02x      0.44x
+Triton Autotuned                      1.581      1.02x      0.44x
+Triton V1 (1024)                      1.590      1.02x      0.43x
+Triton V2 (2048)                      1.594      1.02x      0.43x
+PyTorch Baseline                      1.619      1.00x      0.43x

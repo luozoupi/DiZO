@@ -1,0 +1,176 @@
+================================================================================
+DiZO PROFILING SUMMARY
+================================================================================
+
+--- CPU Time (sorted by total time) ---
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total MFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.02%      62.000us       100.00%     352.700ms     117.567ms           0 b           0 b      17.39 Mb           0 b             3            --  
+                                 zo_gradient_estimation         0.11%     402.000us        85.84%     302.762ms     100.921ms           0 b           0 b      17.38 Mb      -3.00 Kb             3            --  
+                                        training_step_3         0.06%     202.000us        33.67%     118.766ms     118.766ms           0 b           0 b       4.00 Mb           0 b             1            --  
+                                        training_step_2         0.08%     288.000us        33.17%     116.979ms     116.979ms           0 b           0 b       5.37 Mb           0 b             1            --  
+                                        training_step_4         0.05%     181.000us        33.14%     116.893ms     116.893ms           0 b           0 b       8.02 Mb           0 b             1            --  
+                                  zo_perturb_+eps_reset         7.96%      28.065ms        18.31%      64.581ms      21.527ms           0 b       2.66 Kb     958.00 Kb      -6.73 Gb             3            --  
+                                        zo_perturb_+eps         7.32%      25.823ms        17.61%      62.095ms      20.698ms           0 b       2.74 Kb       8.00 Kb      -6.73 Gb             3            --  
+                                       zo_perturb_-2eps         7.25%      25.557ms        17.56%      61.939ms      20.646ms           0 b       2.74 Kb     950.00 Kb      -6.78 Gb             3            --  
+                                           zo_forward_1         5.43%      19.138ms        16.37%      57.722ms      19.241ms           0 b        -160 b       7.75 Mb    -105.79 Mb             3            --  
+                                              aten::mul        16.33%      57.597ms        16.33%      57.597ms       6.941us      -9.68 Kb      -9.68 Kb      12.99 Gb      12.99 Gb          8298      6959.057  
+                                           zo_forward_2         5.31%      18.744ms        15.84%      55.851ms      18.617ms           0 b         -96 b       7.75 Mb    -102.18 Mb             3            --  
+                                           aten::normal         3.60%      12.680ms        14.30%      50.437ms      10.833us           0 b           0 b       7.42 Gb           0 b          4656            --  
+                                    zo_parameter_update         0.16%     547.000us        13.65%      48.146ms      16.049ms           0 b           0 b      12.00 Kb      -6.00 Kb             3            --  
+                                              zo_update         5.38%      18.988ms        13.50%      47.599ms      15.866ms           0 b       1.48 Kb      18.00 Kb      -4.89 Gb             3            --  
+                                           aten::linear         1.68%       5.932ms         8.77%      30.936ms      35.075us           0 b           0 b      83.47 Mb      -4.56 Mb           882            --  
+                                          aten::normal_         8.48%      29.897ms         8.48%      29.897ms       6.421us           0 b           0 b           0 b           0 b          4656            --  
+                                              aten::add         7.64%      26.932ms         7.64%      26.932ms       6.832us           0 b           0 b       5.58 Gb       5.58 Gb          3942      2989.644  
+                                            aten::addmm         5.83%      20.575ms         5.83%      20.575ms      23.814us           0 b           0 b      73.50 Mb      73.50 Mb           864     96636.764  
+                                            aten::empty         3.61%      12.718ms         3.61%      12.718ms       2.019us       1.64 Kb       1.64 Kb       7.47 Gb       7.47 Gb          6300            --  
+                                            aten::clone         0.55%       1.940ms         2.53%       8.909ms      14.701us           0 b           0 b      44.75 Mb      -3.95 Mb           606            --  
+                                            aten::copy_         2.40%       8.466ms         2.40%       8.466ms       8.987us         -12 b         -12 b           0 b           0 b           942            --  
+                                              aten::sub         2.14%       7.540ms         2.14%       7.540ms       6.395us           0 b           0 b       1.86 Gb       1.86 Gb          1179            --  
+                                       aten::layer_norm         0.21%     728.000us         1.95%       6.879ms      23.885us           0 b           0 b      15.07 Mb    -199.50 Kb           288            --  
+                                       aten::contiguous         0.32%       1.118ms         1.95%       6.864ms      15.459us           0 b           0 b      37.24 Mb       6.52 Mb           444            --  
+                                aten::native_layer_norm         1.28%       4.518ms         1.74%       6.151ms      21.358us           0 b           0 b      15.27 Mb      -6.50 Kb           288            --  
+                                               aten::to         0.15%     534.000us         1.63%       5.737ms      16.206us        -104 b         -48 b       1.72 Mb     233.50 Kb           354            --  
+                                         aten::_to_copy         0.40%       1.404ms         1.53%       5.379ms      16.602us         -52 b         -48 b       1.73 Mb           0 b           324            --  
+                                              aten::bmm         1.42%       5.001ms         1.42%       5.001ms      17.365us           0 b           0 b       9.14 Mb       9.14 Mb           288       217.055  
+                                          aten::reshape         0.22%     760.000us         0.88%       3.094ms       3.461us           0 b           0 b       7.50 Mb           0 b           894            --  
+                                                aten::t         0.46%       1.615ms         0.84%       2.958ms       3.354us           0 b           0 b           0 b           0 b           882            --  
+                                        aten::transpose         0.71%       2.491ms         0.75%       2.645ms       1.651us           0 b           0 b           0 b           0 b          1602            --  
+                                       aten::empty_like         0.32%       1.119ms         0.66%       2.319ms       3.865us           0 b           0 b      44.75 Mb       3.95 Mb           600            --  
+                                             aten::relu         0.13%     446.000us         0.55%       1.931ms      13.410us           0 b           0 b      30.00 Mb       1.12 Mb           144            --  
+                                              aten::max         0.08%     281.000us         0.47%       1.666ms      11.569us           0 b           0 b       1.64 Mb     161.50 Kb           144            --  
+                                        aten::clamp_min         0.44%       1.544ms         0.44%       1.544ms      10.722us           0 b           0 b      30.00 Mb      30.00 Mb           144            --  
+                                          aten::maximum         0.43%       1.527ms         0.43%       1.527ms      10.604us           0 b           0 b       1.64 Mb       1.64 Mb           144            --  
+                                          aten::softmax         0.05%     188.000us         0.40%       1.414ms       9.819us           0 b           0 b       3.23 Mb      12.50 Kb           144            --  
+                                           aten::matmul         0.05%     186.000us         0.39%       1.366ms      75.889us           0 b           0 b      15.97 Mb           0 b            18            --  
+                                         aten::_softmax         0.35%       1.234ms         0.35%       1.234ms       8.569us           0 b           0 b       3.23 Mb       3.23 Mb           144            --  
+                                               aten::mm         0.33%       1.173ms         0.33%       1.173ms      65.167us           0 b           0 b      15.97 Mb      15.97 Mb            18      8572.109  
+                                           data_loading         0.03%      98.000us         0.27%     953.000us     317.667us           0 b      -1.25 Kb      -1.00 Kb      -4.00 Kb             3            --  
+                                    aten::empty_strided         0.24%     842.000us         0.24%     842.000us       2.552us           0 b           0 b       1.73 Mb       1.73 Mb           330            --  
+enumerate(DataLoader)#_SingleProcessDataLoaderIter._...         0.12%     411.000us         0.19%     679.000us     226.333us       1.25 Kb           0 b           0 b           0 b             3            --  
+                                             aten::view         0.14%     482.000us         0.14%     482.000us       0.143us           0 b           0 b           0 b           0 b          3378            --  
+                                        aten::embedding         0.02%      83.000us         0.13%     472.000us      39.333us           0 b           0 b     480.00 Kb           0 b            12            --  
+                                     aten::index_select         0.08%     287.000us         0.10%     358.000us      29.833us           0 b           0 b     480.00 Kb           0 b            12            --  
+                                      aten::masked_fill         0.01%      19.000us         0.10%     351.000us      29.250us           0 b           0 b      10.00 Kb           0 b            12            --  
+                               aten::cross_entropy_loss         0.01%      41.000us         0.08%     275.000us      45.833us           0 b           0 b       3.00 Kb     -12.25 Mb             6            --  
+                                     aten::masked_fill_         0.06%     218.000us         0.06%     218.000us       9.083us           0 b           0 b           0 b           0 b            24            --  
+                                            aten::fill_         0.06%     214.000us         0.06%     217.000us       7.233us         -16 b         -16 b           0 b           0 b            30            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 352.700ms
+
+
+--- CUDA Time (sorted by total time) ---
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total MFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.02%      62.000us       100.00%     352.700ms     117.567ms           0 b           0 b      17.39 Mb           0 b             3            --  
+                                        training_step_2         0.08%     288.000us        33.17%     116.979ms     116.979ms           0 b           0 b       5.37 Mb           0 b             1            --  
+                                           data_loading         0.03%      98.000us         0.27%     953.000us     317.667us           0 b      -1.25 Kb      -1.00 Kb      -4.00 Kb             3            --  
+enumerate(DataLoader)#_SingleProcessDataLoaderIter._...         0.12%     411.000us         0.19%     679.000us     226.333us       1.25 Kb           0 b           0 b           0 b             3            --  
+                                             aten::full         0.03%      91.000us         0.05%     161.000us      13.417us       1.25 Kb           0 b       5.00 Kb           0 b            12            --  
+                                            aten::empty         3.61%      12.718ms         3.61%      12.718ms       2.019us       1.64 Kb       1.64 Kb       7.47 Gb       7.47 Gb          6300            --  
+                                            aten::fill_         0.06%     214.000us         0.06%     217.000us       7.233us         -16 b         -16 b           0 b           0 b            30            --  
+                                           aten::select         0.04%     138.000us         0.04%     153.000us       6.375us           0 b           0 b           0 b           0 b            24            --  
+                                       aten::as_strided         0.06%     212.000us         0.06%     212.000us       0.122us           0 b           0 b           0 b           0 b          1740            --  
+                                            aten::slice         0.04%     158.000us         0.05%     166.000us       2.128us           0 b           0 b           0 b           0 b            78            --  
+                                            aten::copy_         2.40%       8.466ms         2.40%       8.466ms       8.987us         -12 b         -12 b           0 b           0 b           942            --  
+                                               aten::to         0.15%     534.000us         1.63%       5.737ms      16.206us        -104 b         -48 b       1.72 Mb     233.50 Kb           354            --  
+                                         aten::_to_copy         0.40%       1.404ms         1.53%       5.379ms      16.602us         -52 b         -48 b       1.73 Mb           0 b           324            --  
+                                    aten::empty_strided         0.24%     842.000us         0.24%     842.000us       2.552us           0 b           0 b       1.73 Mb       1.73 Mb           330            --  
+                                 zo_gradient_estimation         0.11%     402.000us        85.84%     302.762ms     100.921ms           0 b           0 b      17.38 Mb      -3.00 Kb             3            --  
+                                        zo_perturb_+eps         7.32%      25.823ms        17.61%      62.095ms      20.698ms           0 b       2.74 Kb       8.00 Kb      -6.73 Gb             3            --  
+                                           aten::normal         3.60%      12.680ms        14.30%      50.437ms      10.833us           0 b           0 b       7.42 Gb           0 b          4656            --  
+                                          aten::normal_         8.48%      29.897ms         8.48%      29.897ms       6.421us           0 b           0 b           0 b           0 b          4656            --  
+                                              aten::mul        16.33%      57.597ms        16.33%      57.597ms       6.941us      -9.68 Kb      -9.68 Kb      12.99 Gb      12.99 Gb          8298      6959.057  
+                                              aten::add         7.64%      26.932ms         7.64%      26.932ms       6.832us           0 b           0 b       5.58 Gb       5.58 Gb          3942      2989.644  
+                aten::_has_compatible_shallow_copy_type         0.00%       0.000us         0.00%       0.000us       0.000us           0 b           0 b      -2.68 Gb      -2.68 Gb          4656            --  
+                                           zo_forward_1         5.43%      19.138ms        16.37%      57.722ms      19.241ms           0 b        -160 b       7.75 Mb    -105.79 Mb             3            --  
+                                             aten::view         0.14%     482.000us         0.14%     482.000us       0.143us           0 b           0 b           0 b           0 b          3378            --  
+                                        aten::embedding         0.02%      83.000us         0.13%     472.000us      39.333us           0 b           0 b     480.00 Kb           0 b            12            --  
+                                          aten::reshape         0.22%     760.000us         0.88%       3.094ms       3.461us           0 b           0 b       7.50 Mb           0 b           894            --  
+                                     aten::index_select         0.08%     287.000us         0.10%     358.000us      29.833us           0 b           0 b     480.00 Kb           0 b            12            --  
+                                          aten::resize_         0.02%      58.000us         0.02%      58.000us       2.417us           0 b           0 b     483.00 Kb     483.00 Kb            24            --  
+                                             aten::ones         0.01%      35.000us         0.03%     118.000us      19.667us           0 b           0 b       3.00 Kb           0 b             6            --  
+                                           aten::arange         0.03%     110.000us         0.05%     192.000us      16.000us           0 b           0 b       6.00 Kb         512 b            12            --  
+                                               aten::lt         0.03%      95.000us         0.03%      95.000us      15.833us           0 b           0 b       3.00 Kb       3.00 Kb             6            --  
+                                     aten::masked_fill_         0.06%     218.000us         0.06%     218.000us       9.083us           0 b           0 b           0 b           0 b            24            --  
+                                        aten::unsqueeze         0.01%      36.000us         0.01%      43.000us       1.792us           0 b           0 b           0 b           0 b            24            --  
+                                           aten::expand         0.01%      23.000us         0.01%      24.000us       2.000us           0 b           0 b           0 b           0 b            12            --  
+                                             aten::rsub         0.01%      27.000us         0.03%     100.000us      16.667us          16 b          16 b       5.00 Kb           0 b             6            --  
+                                              aten::sub         2.14%       7.540ms         2.14%       7.540ms       6.395us           0 b           0 b       1.86 Gb       1.86 Gb          1179            --  
+                                      aten::masked_fill         0.01%      19.000us         0.10%     351.000us      29.250us           0 b           0 b      10.00 Kb           0 b            12            --  
+                                            aten::clone         0.55%       1.940ms         2.53%       8.909ms      14.701us           0 b           0 b      44.75 Mb      -3.95 Mb           606            --  
+                                       aten::empty_like         0.32%       1.119ms         0.66%       2.319ms       3.865us           0 b           0 b      44.75 Mb       3.95 Mb           600            --  
+                                           aten::cumsum         0.02%      83.000us         0.02%      83.000us      13.833us           0 b           0 b       3.00 Kb       3.00 Kb             6            --  
+                                          aten::type_as         0.02%      64.000us         0.02%      64.000us      10.667us           0 b           0 b           0 b           0 b             6            --  
+                                           aten::linear         1.68%       5.932ms         8.77%      30.936ms      35.075us           0 b           0 b      83.47 Mb      -4.56 Mb           882            --  
+                                                aten::t         0.46%       1.615ms         0.84%       2.958ms       3.354us           0 b           0 b           0 b           0 b           882            --  
+                                        aten::transpose         0.71%       2.491ms         0.75%       2.645ms       1.651us           0 b           0 b           0 b           0 b          1602            --  
+                                           aten::matmul         0.05%     186.000us         0.39%       1.366ms      75.889us           0 b           0 b      15.97 Mb           0 b            18            --  
+                                               aten::mm         0.33%       1.173ms         0.33%       1.173ms      65.167us           0 b           0 b      15.97 Mb      15.97 Mb            18      8572.109  
+                                     aten::_unsafe_view         0.01%      30.000us         0.01%      30.000us       0.185us           0 b           0 b           0 b           0 b           162            --  
+                                            aten::addmm         5.83%      20.575ms         5.83%      20.575ms      23.814us           0 b           0 b      73.50 Mb      73.50 Mb           864     96636.764  
+                                       aten::contiguous         0.32%       1.118ms         1.95%       6.864ms      15.459us           0 b           0 b      37.24 Mb       6.52 Mb           444            --  
+                                              aten::bmm         1.42%       5.001ms         1.42%       5.001ms      17.365us           0 b           0 b       9.14 Mb       9.14 Mb           288       217.055  
+                                       aten::lift_fresh         0.00%       0.000us         0.00%       0.000us       0.000us          16 b          16 b           0 b           0 b           162            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 352.700ms
+
+
+--- Memory Usage ---
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total MFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                              aten::mul        16.33%      57.597ms        16.33%      57.597ms       6.941us      -9.68 Kb      -9.68 Kb      12.99 Gb      12.99 Gb          8298      6959.057  
+                                            aten::empty         3.61%      12.718ms         3.61%      12.718ms       2.019us       1.64 Kb       1.64 Kb       7.47 Gb       7.47 Gb          6300            --  
+                                              aten::add         7.64%      26.932ms         7.64%      26.932ms       6.832us           0 b           0 b       5.58 Gb       5.58 Gb          3942      2989.644  
+                                              aten::sub         2.14%       7.540ms         2.14%       7.540ms       6.395us           0 b           0 b       1.86 Gb       1.86 Gb          1179            --  
+                                            aten::addmm         5.83%      20.575ms         5.83%      20.575ms      23.814us           0 b           0 b      73.50 Mb      73.50 Mb           864     96636.764  
+                                        aten::clamp_min         0.44%       1.544ms         0.44%       1.544ms      10.722us           0 b           0 b      30.00 Mb      30.00 Mb           144            --  
+                                               aten::mm         0.33%       1.173ms         0.33%       1.173ms      65.167us           0 b           0 b      15.97 Mb      15.97 Mb            18      8572.109  
+                                     aten::_log_softmax         0.02%      76.000us         0.02%      76.000us      12.667us           0 b           0 b      15.07 Mb      15.07 Mb             6            --  
+                                              aten::bmm         1.42%       5.001ms         1.42%       5.001ms      17.365us           0 b           0 b       9.14 Mb       9.14 Mb           288       217.055  
+                                       aten::contiguous         0.32%       1.118ms         1.95%       6.864ms      15.459us           0 b           0 b      37.24 Mb       6.52 Mb           444            --  
+                                       aten::empty_like         0.32%       1.119ms         0.66%       2.319ms       3.865us           0 b           0 b      44.75 Mb       3.95 Mb           600            --  
+                                         aten::_softmax         0.35%       1.234ms         0.35%       1.234ms       8.569us           0 b           0 b       3.23 Mb       3.23 Mb           144            --  
+                                    aten::empty_strided         0.24%     842.000us         0.24%     842.000us       2.552us           0 b           0 b       1.73 Mb       1.73 Mb           330            --  
+                                          aten::maximum         0.43%       1.527ms         0.43%       1.527ms      10.604us           0 b           0 b       1.64 Mb       1.64 Mb           144            --  
+                                             aten::relu         0.13%     446.000us         0.55%       1.931ms      13.410us           0 b           0 b      30.00 Mb       1.12 Mb           144            --  
+                                          aten::resize_         0.02%      58.000us         0.02%      58.000us       2.417us           0 b           0 b     483.00 Kb     483.00 Kb            24            --  
+                                               aten::to         0.15%     534.000us         1.63%       5.737ms      16.206us        -104 b         -48 b       1.72 Mb     233.50 Kb           354            --  
+                                              aten::max         0.08%     281.000us         0.47%       1.666ms      11.569us           0 b           0 b       1.64 Mb     161.50 Kb           144            --  
+                                          aten::softmax         0.05%     188.000us         0.40%       1.414ms       9.819us           0 b           0 b       3.23 Mb      12.50 Kb           144            --  
+                                 aten::nll_loss_forward         0.02%      85.000us         0.02%      85.000us      14.167us           0 b           0 b       6.00 Kb       6.00 Kb             6            --  
+                                               aten::lt         0.03%      95.000us         0.03%      95.000us      15.833us           0 b           0 b       3.00 Kb       3.00 Kb             6            --  
+                                           aten::cumsum         0.02%      83.000us         0.02%      83.000us      13.833us           0 b           0 b       3.00 Kb       3.00 Kb             6            --  
+                                               aten::eq         0.03%     103.000us         0.03%     103.000us      17.167us           0 b           0 b       3.00 Kb       3.00 Kb             6            --  
+                                              aten::div         0.02%      53.000us         0.02%      53.000us      17.667us           0 b           0 b       1.50 Kb       1.50 Kb             3            --  
+                                           aten::arange         0.03%     110.000us         0.05%     192.000us      16.000us           0 b           0 b       6.00 Kb         512 b            12            --  
+                                          ProfilerStep*         0.02%      62.000us       100.00%     352.700ms     117.567ms           0 b           0 b      17.39 Mb           0 b             3            --  
+                                        training_step_2         0.08%     288.000us        33.17%     116.979ms     116.979ms           0 b           0 b       5.37 Mb           0 b             1            --  
+enumerate(DataLoader)#_SingleProcessDataLoaderIter._...         0.12%     411.000us         0.19%     679.000us     226.333us       1.25 Kb           0 b           0 b           0 b             3            --  
+                                             aten::full         0.03%      91.000us         0.05%     161.000us      13.417us       1.25 Kb           0 b       5.00 Kb           0 b            12            --  
+                                            aten::fill_         0.06%     214.000us         0.06%     217.000us       7.233us         -16 b         -16 b           0 b           0 b            30            --  
+                                           aten::select         0.04%     138.000us         0.04%     153.000us       6.375us           0 b           0 b           0 b           0 b            24            --  
+                                       aten::as_strided         0.06%     212.000us         0.06%     212.000us       0.122us           0 b           0 b           0 b           0 b          1740            --  
+                                            aten::slice         0.04%     158.000us         0.05%     166.000us       2.128us           0 b           0 b           0 b           0 b            78            --  
+                                            aten::copy_         2.40%       8.466ms         2.40%       8.466ms       8.987us         -12 b         -12 b           0 b           0 b           942            --  
+                                         aten::_to_copy         0.40%       1.404ms         1.53%       5.379ms      16.602us         -52 b         -48 b       1.73 Mb           0 b           324            --  
+                                           aten::normal         3.60%      12.680ms        14.30%      50.437ms      10.833us           0 b           0 b       7.42 Gb           0 b          4656            --  
+                                          aten::normal_         8.48%      29.897ms         8.48%      29.897ms       6.421us           0 b           0 b           0 b           0 b          4656            --  
+                                             aten::view         0.14%     482.000us         0.14%     482.000us       0.143us           0 b           0 b           0 b           0 b          3378            --  
+                                        aten::embedding         0.02%      83.000us         0.13%     472.000us      39.333us           0 b           0 b     480.00 Kb           0 b            12            --  
+                                          aten::reshape         0.22%     760.000us         0.88%       3.094ms       3.461us           0 b           0 b       7.50 Mb           0 b           894            --  
+                                     aten::index_select         0.08%     287.000us         0.10%     358.000us      29.833us           0 b           0 b     480.00 Kb           0 b            12            --  
+                                             aten::ones         0.01%      35.000us         0.03%     118.000us      19.667us           0 b           0 b       3.00 Kb           0 b             6            --  
+                                     aten::masked_fill_         0.06%     218.000us         0.06%     218.000us       9.083us           0 b           0 b           0 b           0 b            24            --  
+                                        aten::unsqueeze         0.01%      36.000us         0.01%      43.000us       1.792us           0 b           0 b           0 b           0 b            24            --  
+                                           aten::expand         0.01%      23.000us         0.01%      24.000us       2.000us           0 b           0 b           0 b           0 b            12            --  
+                                             aten::rsub         0.01%      27.000us         0.03%     100.000us      16.667us          16 b          16 b       5.00 Kb           0 b             6            --  
+                                      aten::masked_fill         0.01%      19.000us         0.10%     351.000us      29.250us           0 b           0 b      10.00 Kb           0 b            12            --  
+                                          aten::type_as         0.02%      64.000us         0.02%      64.000us      10.667us           0 b           0 b           0 b           0 b             6            --  
+                                                aten::t         0.46%       1.615ms         0.84%       2.958ms       3.354us           0 b           0 b           0 b           0 b           882            --  
+                                        aten::transpose         0.71%       2.491ms         0.75%       2.645ms       1.651us           0 b           0 b           0 b           0 b          1602            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 352.700ms
