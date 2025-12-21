@@ -1,0 +1,14 @@
+DiZO Kernel Benchmark Summary
+Generated: Tue Dec 16 02:55:38 PM CST 2025
+Models: opt-350m
+Methods: pytorch_baseline
+======================================
+
+--- opt-350m_complete_pytorch.txt ---
+
+--- opt-350m_pytorch_baseline.txt ---
+GPU Memory: 139.8 GB total, 139.8 GB free, 118.8 GB usable
+   Time: 1.807 ms, Memory: 1328.00 MB
+SUMMARY for OPT-350M:
+Method                            Time (ms)    Speedup     Memory (MB)
+

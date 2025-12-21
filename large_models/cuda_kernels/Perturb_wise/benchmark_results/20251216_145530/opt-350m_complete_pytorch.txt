@@ -1,0 +1,7 @@
+usage: benchmark_kernels.py [-h]
+                            [--model {opt-350m,opt-2.7b,opt-6.7b,opt-13b,all,custom}]
+                            [--n_elements N_ELEMENTS] [--n_iter N_ITER]
+                            [--warmup WARMUP] [--skip_correctness]
+                            [--complete_step] [--complete_step_only]
+                            [--method {all,pytorch_baseline,pytorch_fused,chunked,triton_v1,triton_v2,triton_auto,cuda}]
+benchmark_kernels.py: error: argument --method: invalid choice: 'pytorch' (choose from 'all', 'pytorch_baseline', 'pytorch_fused', 'chunked', 'triton_v1', 'triton_v2', 'triton_auto', 'cuda')
