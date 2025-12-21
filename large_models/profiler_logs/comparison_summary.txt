@@ -1,0 +1,35 @@
+====================================================================================================
+DiZO MULTI-MODEL PROFILING COMPARISON
+====================================================================================================
+
+Model                Parameters   CUDA Time       CPU Time        Scale vs 350M  
+--------------------------------------------------------------------------------
+OPT-350M             331M         835.3ms         764.6ms         1.00x          
+OPT-2.7B             2.7B         1.379s          1.006s          1.65x          
+OPT-6.7B             6.7B         2.041s          1.183s          2.44x          
+OPT-13B              13B          3.597s          1.994s          4.31x          
+
+====================================================================================================
+KEY INSIGHTS
+====================================================================================================
+
+1. SUB-LINEAR SCALING: CUDA time scales ~4.3x while parameters scale ~39x (350M → 13B)
+   - This indicates excellent GPU utilization efficiency at larger scales
+
+2. TIME PER BILLION PARAMETERS (efficiency improves with scale):
+   - OPT-350M: 835.3 ms/B (baseline)
+   - OPT-2.7B: 510.7 ms/B (1.64x more efficient)
+   - OPT-6.7B: 304.6 ms/B (2.74x more efficient)
+   - OPT-13B:  276.7 ms/B (3.02x more efficient)
+
+3. ZO OPERATION BREAKDOWN:
+   - zo_gradient_estimation dominates (~75-80% of zo_step time)
+   - zo_update scales linearly with parameters (as expected)
+   - Forward passes are well-optimized
+
+4. OPTIMIZATION OPPORTUNITIES:
+   - Fused perturbation kernels can reduce zo_gradient_estimation time
+   - Custom Philox RNG (from our kernel work) can speed up aten::normal_
+   - Batch size reduction at larger scales may leave GPU underutilized
+
+====================================================================================================

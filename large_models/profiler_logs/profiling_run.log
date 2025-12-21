@@ -1,0 +1,526 @@
+nohup: ignoring input
+============================================================================
+DiZO Selective Model Profiling
+============================================================================
+GPU: 5
+Steps: 5
+Models: 350m 2.7b 6.7b 13b
+Output: ./profiler_logs
+============================================================================
+
+>>> Profiling facebook/opt-350m (batch_size=4)
+
+2025-12-15 20:16:39,727 - INFO - PyTorch version 2.3.1 available.
+2025-12-15 20:16:42,884 - INFO - ================================================================================
+2025-12-15 20:16:42,884 - INFO - PROFILING MODEL: facebook/opt-350m
+2025-12-15 20:16:42,885 - INFO - Output directory: ./profiler_logs/profile_opt-350m
+2025-12-15 20:16:42,885 - INFO - ================================================================================
+2025-12-15 20:16:42,885 - INFO - Loading model: facebook/opt-350m
+2025-12-15 20:16:44,913 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+2025-12-15 20:16:45,889 - INFO - Loading task: SST2
+2025-12-15 20:16:49,648 - INFO - Preparing training data...
+2025-12-15 20:16:49,714 - INFO - Number of trainable parameters: 331196416
+2025-12-15 20:16:49,714 - INFO - Starting profiling for 5 steps...
+2025-12-15 20:16:49,714 - INFO - Output directory: ./profiler_logs/profile_opt-350m
+STAGE:2025-12-15 20:16:51 3355767:3355767 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+2025-12-15 20:16:52,007 - INFO - Step 1: loss = 6.8711
+2025-12-15 20:16:52,194 - INFO - Step 2: loss = 7.5547
+2025-12-15 20:16:52,333 - INFO - Step 3: loss = 7.2656
+2025-12-15 20:16:52,470 - INFO - Step 4: loss = 8.1406
+2025-12-15 20:16:52,611 - INFO - Step 5: loss = 7.0938
+STAGE:2025-12-15 20:16:52 3355767:3355767 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2025-12-15 20:16:52 3355767:3355767 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+2025-12-15 20:17:04,581 - INFO - Step 6: loss = 6.4414
+2025-12-15 20:17:04,619 - INFO - Chrome trace available at: ./profiler_logs/profile_opt-350m/cs-u-converge_3355767.1765851423224544001.pt.trace.json
+2025-12-15 20:17:04,620 - INFO - 
+================================================================================
+2025-12-15 20:17:04,620 - INFO - PROFILING SUMMARY
+2025-12-15 20:17:04,620 - INFO - ================================================================================
+2025-12-15 20:17:04,620 - INFO - 
+--- CPU Time (sorted by total time) ---
+2025-12-15 20:17:08,698 - INFO - 
+--- CUDA Time (sorted by total time) ---
+2025-12-15 20:17:12,658 - INFO - 
+--- Memory Usage (sorted by self CUDA memory) ---
+2025-12-15 20:17:28,582 - INFO - Summary saved to: ./profiler_logs/profile_opt-350m/opt-350m_profiler_summary.txt
+2025-12-15 20:17:28,582 - INFO - 
+================================================================================
+2025-12-15 20:17:28,582 - INFO - VISUALIZATION OPTIONS:
+2025-12-15 20:17:28,582 - INFO - ================================================================================
+2025-12-15 20:17:28,582 - INFO - 1. Chrome Trace Viewer: Open chrome://tracing and load .pt.trace.json files in ./profiler_logs/profile_opt-350m
+2025-12-15 20:17:28,582 - INFO - 2. TensorBoard: tensorboard --logdir=./profiler_logs/profile_opt-350m
+2025-12-15 20:17:28,582 - INFO - 3. Perfetto (online): https://ui.perfetto.dev/ - drag and drop the .pt.trace.json file
+2025-12-15 20:17:28,582 - INFO - ================================================================================
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     111.000us       100.00%     764.621ms     152.924ms       0.000us         0.00%      87.502ms      17.500ms           0 b           0 b      75.79 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.10%     738.000us        86.93%     664.702ms     132.940ms       0.000us         0.00%      73.090ms      14.618ms           0 b           8 b      74.77 Mb      -5.00 Kb             5            --  
+                                        training_step_3         0.02%     165.000us        24.39%     186.491ms     186.491ms       0.000us         0.00%      17.465ms      17.465ms           0 b           0 b       8.44 Mb           0 b             1            --  
+                                           zo_forward_1         4.55%      34.805ms        24.08%     184.114ms      36.823ms       0.000us         0.00%       9.550ms       1.910ms           0 b        -184 b      37.21 Mb    -522.74 Mb             5            --  
+                                        training_step_2         0.03%     205.000us        21.00%     160.554ms     160.554ms       0.000us         0.00%      17.420ms      17.420ms           0 b           0 b      12.27 Mb           0 b             1            --  
+                                        training_step_6         0.02%     175.000us        18.54%     141.784ms     141.784ms       0.000us         0.00%      17.620ms      17.620ms           0 b           0 b      21.49 Mb           0 b             1            --  
+                                        training_step_4         0.05%     369.000us        18.17%     138.956ms     138.956ms       0.000us         0.00%      17.515ms      17.515ms           0 b           0 b      13.81 Mb           0 b             1            --  
+                                        training_step_5         0.02%     148.000us        17.88%     136.725ms     136.725ms       0.000us         0.00%      17.482ms      17.482ms           0 b           0 b      19.78 Mb           0 b             1            --  
+                                  zo_perturb_+eps_reset         6.11%      46.681ms        16.81%     128.569ms      25.714ms       0.000us         0.00%      17.686ms       3.537ms           0 b       5.52 Kb    -237.50 Kb     -11.16 Gb             5            --  
+                                       zo_perturb_-2eps         5.62%      42.986ms        16.06%     122.830ms      24.566ms       0.000us         0.00%      18.324ms       3.665ms           0 b       5.48 Kb     589.50 Kb     -11.22 Gb             5            --  
+                                              aten::mul        10.22%      78.123ms        15.89%     121.534ms       8.788us      25.345ms         3.03%      25.345ms       1.833us     -18.61 Kb     -18.61 Kb      21.70 Gb      21.70 Gb         13830        11.611  
+                                        zo_perturb_+eps         5.39%      41.202ms        15.55%     118.868ms      23.774ms       0.000us         0.00%      17.924ms       3.585ms           0 b       5.48 Kb      12.00 Kb     -10.98 Gb             5            --  
+                                           aten::normal         3.28%      25.088ms        14.81%     113.214ms      14.589us       0.000us         0.00%      26.296ms       3.389us           0 b           0 b      12.35 Gb      -6.02 Mb          7760            --  
+                                       cudaLaunchKernel        14.68%     112.275ms        14.68%     112.275ms       3.360us       0.000us         0.00%       0.000us       0.000us           0 b           0 b           0 b           0 b         33418            --  
+                                           zo_forward_2         4.60%      35.187ms        14.29%     109.251ms      21.850ms       0.000us         0.00%       9.586ms       1.917ms           0 b        -168 b      37.21 Mb    -524.14 Mb             5            --  
+                                    zo_parameter_update         0.12%     888.000us        12.68%      96.945ms      19.389ms       0.000us         0.00%      14.402ms       2.880ms           0 b           0 b       1.02 Mb     -10.00 Kb             5            --  
+                                              zo_update         4.12%      31.466ms        12.56%      96.057ms      19.211ms       0.000us         0.00%      14.402ms       2.880ms           0 b       2.04 Kb       1.03 Mb      -8.16 Gb             5            --  
+                                              aten::bmm         3.83%      29.296ms        10.19%      77.909ms     162.310us       1.075ms         0.13%       1.075ms       2.240us           0 b           0 b      48.47 Mb      48.47 Mb           480         1.621  
+                                          aten::normal_         5.73%      43.781ms         8.97%      68.579ms       8.838us      27.423ms         3.28%      27.423ms       3.534us           0 b           0 b           0 b           0 b          7760            --  
+                                              aten::add         5.22%      39.931ms         8.19%      62.609ms       9.530us      13.022ms         1.56%      13.022ms       1.982us         -32 b         -32 b       9.35 Gb       9.35 Gb          6570         5.013  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 764.632ms
+Self CUDA time total: 835.302ms
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           zo_forward_1         0.00%       0.000us         0.00%       0.000us       0.000us     179.713ms        21.51%     179.713ms      35.943ms           0 b           0 b           0 b           0 b             5            --  
+                                  zo_perturb_+eps_reset         0.00%       0.000us         0.00%       0.000us       0.000us     127.282ms        15.24%     127.282ms      25.456ms           0 b           0 b           0 b           0 b             5            --  
+                                       zo_perturb_-2eps         0.00%       0.000us         0.00%       0.000us       0.000us     121.475ms        14.54%     121.475ms      24.295ms           0 b           0 b           0 b           0 b             5            --  
+                                        zo_perturb_+eps         0.00%       0.000us         0.00%       0.000us       0.000us     117.839ms        14.11%     117.839ms      23.568ms           0 b           0 b           0 b           0 b             5            --  
+                                           zo_forward_2         0.00%       0.000us         0.00%       0.000us       0.000us     105.348ms        12.61%     105.348ms      21.070ms           0 b           0 b           0 b           0 b             5            --  
+                                              zo_update         0.00%       0.000us         0.00%       0.000us       0.000us      95.739ms        11.46%      95.739ms      19.148ms           0 b           0 b           0 b           0 b             5            --  
+                                          ProfilerStep*         0.01%     111.000us       100.00%     764.621ms     152.924ms       0.000us         0.00%      87.502ms      17.500ms           0 b           0 b      75.79 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.10%     738.000us        86.93%     664.702ms     132.940ms       0.000us         0.00%      73.090ms      14.618ms           0 b           8 b      74.77 Mb      -5.00 Kb             5            --  
+                                          aten::normal_         5.73%      43.781ms         8.97%      68.579ms       8.838us      27.423ms         3.28%      27.423ms       3.534us           0 b           0 b           0 b           0 b          7760            --  
+void at::native::(anonymous namespace)::distribution...         0.00%       0.000us         0.00%       0.000us       0.000us      27.423ms         3.28%      27.423ms       3.534us           0 b           0 b           0 b           0 b          7760            --  
+                                           aten::normal         3.28%      25.088ms        14.81%     113.214ms      14.589us       0.000us         0.00%      26.296ms       3.389us           0 b           0 b      12.35 Gb      -6.02 Mb          7760            --  
+                                              aten::mul        10.22%      78.123ms        15.89%     121.534ms       8.788us      25.345ms         3.03%      25.345ms       1.833us     -18.61 Kb     -18.61 Kb      21.70 Gb      21.70 Gb         13830        11.611  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      25.335ms         3.03%      25.335ms       1.833us           0 b           0 b           0 b           0 b         13820            --  
+                                       zo_perturb_-2eps         5.62%      42.986ms        16.06%     122.830ms      24.566ms       0.000us         0.00%      18.324ms       3.665ms           0 b       5.48 Kb     589.50 Kb     -11.22 Gb             5            --  
+                                        zo_perturb_+eps         5.39%      41.202ms        15.55%     118.868ms      23.774ms       0.000us         0.00%      17.924ms       3.585ms           0 b       5.48 Kb      12.00 Kb     -10.98 Gb             5            --  
+                                  zo_perturb_+eps_reset         6.11%      46.681ms        16.81%     128.569ms      25.714ms       0.000us         0.00%      17.686ms       3.537ms           0 b       5.52 Kb    -237.50 Kb     -11.16 Gb             5            --  
+                                        training_step_6         0.02%     175.000us        18.54%     141.784ms     141.784ms       0.000us         0.00%      17.620ms      17.620ms           0 b           0 b      21.49 Mb           0 b             1            --  
+                                        training_step_4         0.05%     369.000us        18.17%     138.956ms     138.956ms       0.000us         0.00%      17.515ms      17.515ms           0 b           0 b      13.81 Mb           0 b             1            --  
+                                        training_step_5         0.02%     148.000us        17.88%     136.725ms     136.725ms       0.000us         0.00%      17.482ms      17.482ms           0 b           0 b      19.78 Mb           0 b             1            --  
+                                        training_step_3         0.02%     165.000us        24.39%     186.491ms     186.491ms       0.000us         0.00%      17.465ms      17.465ms           0 b           0 b       8.44 Mb           0 b             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 764.632ms
+Self CUDA time total: 835.302ms
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                              aten::mul        10.22%      78.123ms        15.89%     121.534ms       8.788us      25.345ms         3.03%      25.345ms       1.833us     -18.61 Kb     -18.61 Kb      21.70 Gb      21.70 Gb         13830        11.611  
+                                            aten::empty         4.27%      32.676ms         4.27%      32.676ms       3.112us       0.000us         0.00%       0.000us       0.000us       5.30 Kb       5.30 Kb      12.64 Gb      12.64 Gb         10500            --  
+                                              aten::add         5.22%      39.931ms         8.19%      62.609ms       9.530us      13.022ms         1.56%      13.022ms       1.982us         -32 b         -32 b       9.35 Gb       9.35 Gb          6570         5.013  
+                                              aten::sub         1.28%       9.755ms         2.38%      18.162ms       9.243us       4.008ms         0.48%       4.008ms       2.040us         -24 b         -24 b       3.04 Gb       3.04 Gb          1965            --  
+                                            aten::addmm         4.18%      31.943ms         5.45%      41.674ms      28.940us       9.836ms         1.18%       9.836ms       6.831us           0 b           0 b     327.38 Mb     327.38 Mb          1440       468.688  
+                                        aten::clamp_min         0.26%       1.950ms         0.39%       2.951ms      12.296us     240.000us         0.03%     240.000us       1.000us           0 b           0 b     145.50 Mb     145.50 Mb           240            --  
+                                               aten::mm         0.17%       1.305ms         0.22%       1.711ms      57.033us     283.000us         0.03%     283.000us       9.433us           0 b           0 b      76.68 Mb      76.68 Mb            30        41.575  
+                                     aten::_log_softmax         0.01%     107.000us         0.02%     165.000us      16.500us     108.000us         0.01%     108.000us      10.800us           0 b           0 b      70.90 Mb      70.90 Mb            10            --  
+                                              aten::bmm         3.83%      29.296ms        10.19%      77.909ms     162.310us       1.075ms         0.13%       1.075ms       2.240us           0 b           0 b      48.47 Mb      48.47 Mb           480         1.621  
+                                         aten::_softmax         0.22%       1.666ms         0.34%       2.568ms      10.700us     446.000us         0.05%     446.000us       1.858us           0 b           0 b      24.16 Mb      24.16 Mb           240            --  
+                                       aten::empty_like         0.27%       2.060ms         0.93%       7.086ms       7.086us       0.000us         0.00%       0.000us       0.000us           0 b           0 b     216.42 Mb      21.00 Mb          1000            --  
+                                    aten::empty_strided         0.26%       1.998ms         0.26%       1.998ms       3.633us       0.000us         0.00%       0.000us       0.000us           0 b           0 b      12.31 Mb      12.31 Mb           550            --  
+                                          aten::maximum         0.25%       1.916ms         0.40%       3.080ms      12.833us     871.000us         0.10%     871.000us       3.629us           0 b           0 b      12.09 Mb      12.09 Mb           240            --  
+                                       aten::contiguous         0.24%       1.800ms         2.09%      15.972ms      21.584us       0.000us         0.00%       1.645ms       2.223us           0 b           0 b     179.98 Mb      12.06 Mb           740            --  
+                                      aten::log_softmax         0.01%      62.000us         0.03%     210.000us      21.000us       0.000us         0.00%      97.000us       9.700us           0 b           0 b      70.90 Mb       8.82 Mb            10            --  
+                                           aten::linear         1.43%      10.971ms         8.00%      61.161ms      41.606us       0.000us         0.00%      10.017ms       6.814us           0 b           0 b     404.06 Mb       2.92 Mb          1470            --  
+                                          aten::resize_         0.02%     128.000us         0.02%     128.000us       3.200us       0.000us         0.00%       0.000us       0.000us           0 b           0 b       2.28 Mb       2.28 Mb            40            --  
+                                              aten::max         0.05%     400.000us         0.44%       3.350ms      13.958us       0.000us         0.00%     837.000us       3.487us           0 b           0 b      12.09 Mb     541.00 Kb           240            --  
+                                               aten::to         0.16%       1.251ms         1.47%      11.204ms      18.990us       0.000us         0.00%     535.000us       0.907us        -156 b        -136 b      12.31 Mb     475.00 Kb           590            --  
+                                          aten::softmax         0.06%     492.000us         0.40%       3.025ms      12.604us       0.000us         0.00%     440.000us       1.833us           0 b           0 b      24.16 Mb     272.00 Kb           240            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 764.632ms
+Self CUDA time total: 835.302ms
+
+
+✓ facebook/opt-350m complete
+
+>>> Profiling facebook/opt-2.7b (batch_size=2)
+
+2025-12-15 20:17:36,798 - INFO - PyTorch version 2.3.1 available.
+2025-12-15 20:17:36,942 - INFO - ================================================================================
+2025-12-15 20:17:36,942 - INFO - PROFILING MODEL: facebook/opt-2.7b
+2025-12-15 20:17:36,942 - INFO - Output directory: ./profiler_logs/profile_opt-2_7b
+2025-12-15 20:17:36,942 - INFO - ================================================================================
+2025-12-15 20:17:36,942 - INFO - Loading model: facebook/opt-2.7b
+2025-12-15 20:19:41,367 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+2025-12-15 20:19:44,409 - INFO - Loading task: SST2
+2025-12-15 20:19:48,141 - INFO - Preparing training data...
+2025-12-15 20:19:48,210 - INFO - Number of trainable parameters: 2651596800
+2025-12-15 20:19:48,210 - INFO - Starting profiling for 5 steps...
+2025-12-15 20:19:48,210 - INFO - Output directory: ./profiler_logs/profile_opt-2_7b
+STAGE:2025-12-15 20:19:48 3358742:3358742 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+2025-12-15 20:19:49,022 - INFO - Step 1: loss = 6.2656
+2025-12-15 20:19:49,203 - INFO - Step 2: loss = 4.8984
+2025-12-15 20:19:49,385 - INFO - Step 3: loss = 5.6914
+2025-12-15 20:19:49,640 - INFO - Step 4: loss = 7.5469
+2025-12-15 20:19:49,821 - INFO - Step 5: loss = 6.7812
+STAGE:2025-12-15 20:19:50 3358742:3358742 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2025-12-15 20:19:50 3358742:3358742 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+2025-12-15 20:20:05,480 - INFO - Step 6: loss = 7.4453
+2025-12-15 20:20:05,483 - INFO - Chrome trace available at: ./profiler_logs/profile_opt-2_7b/cs-u-converge_3358742.1765851603650768044.pt.trace.json
+2025-12-15 20:20:05,483 - INFO - 
+================================================================================
+2025-12-15 20:20:05,483 - INFO - PROFILING SUMMARY
+2025-12-15 20:20:05,483 - INFO - ================================================================================
+2025-12-15 20:20:05,483 - INFO - 
+--- CPU Time (sorted by total time) ---
+2025-12-15 20:20:10,908 - INFO - 
+--- CUDA Time (sorted by total time) ---
+2025-12-15 20:20:16,334 - INFO - 
+--- Memory Usage (sorted by self CUDA memory) ---
+2025-12-15 20:20:38,014 - INFO - Summary saved to: ./profiler_logs/profile_opt-2_7b/opt-2_7b_profiler_summary.txt
+2025-12-15 20:20:38,014 - INFO - 
+================================================================================
+2025-12-15 20:20:38,014 - INFO - VISUALIZATION OPTIONS:
+2025-12-15 20:20:38,014 - INFO - ================================================================================
+2025-12-15 20:20:38,014 - INFO - 1. Chrome Trace Viewer: Open chrome://tracing and load .pt.trace.json files in ./profiler_logs/profile_opt-2_7b
+2025-12-15 20:20:38,014 - INFO - 2. TensorBoard: tensorboard --logdir=./profiler_logs/profile_opt-2_7b
+2025-12-15 20:20:38,015 - INFO - 3. Perfetto (online): https://ui.perfetto.dev/ - drag and drop the .pt.trace.json file
+2025-12-15 20:20:38,015 - INFO - ================================================================================
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total MFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     131.000us       100.00%        1.006s     201.220ms       0.000us         0.00%     392.113ms      78.423ms           0 b           0 b      22.98 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.08%     825.000us        87.79%     883.263ms     176.653ms       0.000us         0.00%     317.985ms      63.597ms           0 b           8 b      22.98 Mb      -5.00 Kb             5            --  
+                                        training_step_5         0.02%     175.000us        25.35%     255.022ms     255.022ms       0.000us         0.00%      78.016ms      78.016ms           0 b           0 b       3.36 Mb           0 b             1            --  
+                                           zo_forward_1         4.55%      45.772ms        23.64%     237.893ms      47.579ms       0.000us         0.00%      20.102ms       4.020ms           0 b        -288 b      11.41 Mb    -428.23 Mb             5            --  
+                                        training_step_2         0.02%     240.000us        20.59%     207.148ms     207.148ms       0.000us         0.00%      78.863ms      78.863ms           0 b           0 b       5.37 Mb           0 b             1            --  
+                                       cudaLaunchKernel        19.64%     197.624ms        19.64%     197.624ms       4.451us       0.000us         0.00%       0.000us       0.000us           0 b           0 b           0 b           0 b         44402            --  
+                                        training_step_4         0.02%     173.000us        18.09%     181.971ms     181.971ms       0.000us         0.00%      78.416ms      78.416ms           0 b           0 b       6.14 Mb           0 b             1            --  
+                                        training_step_3         0.02%     173.000us        18.03%     181.408ms     181.408ms       0.000us         0.00%      78.764ms      78.764ms           0 b           0 b       5.31 Mb           0 b             1            --  
+                                        training_step_6         0.02%     177.000us        17.93%     180.419ms     180.419ms       0.000us         0.00%      78.054ms      78.054ms           0 b           0 b       2.81 Mb           0 b             1            --  
+                                              aten::mul        11.09%     111.548ms        17.23%     173.338ms       9.426us     129.758ms         9.41%     129.758ms       7.056us     -25.06 Kb     -25.06 Kb     172.92 Gb     172.92 Gb         18390     92823.583  
+                                       zo_perturb_-2eps         5.70%      57.357ms        16.97%     170.758ms      34.152ms       0.000us         0.00%      92.672ms      18.534ms           0 b       7.74 Kb           0 b     -92.89 Gb             5            --  
+                                           aten::linear         1.41%      14.163ms        16.88%     169.834ms      87.997us       0.000us         0.00%      26.317ms      13.636us           0 b           0 b     326.72 Mb       2.87 Mb          1930            --  
+                                  zo_perturb_+eps_reset         5.59%      56.282ms        16.62%     167.188ms      33.438ms       0.000us         0.00%      92.524ms      18.505ms           0 b       7.43 Kb           0 b     -92.15 Gb             5            --  
+                                        zo_perturb_+eps         5.50%      55.375ms        16.54%     166.440ms      33.288ms       0.000us         0.00%      92.580ms      18.516ms           0 b       7.77 Kb           0 b     -91.12 Gb             5            --  
+                                           aten::normal         3.28%      33.029ms        15.10%     151.923ms      14.721us       0.000us         0.00%     131.849ms      12.776us           0 b           0 b      98.74 Gb     -50.11 Mb         10320            --  
+                                           zo_forward_2         4.25%      42.713ms        13.90%     139.842ms      27.968ms       0.000us         0.00%      20.089ms       4.018ms           0 b        -296 b      11.57 Mb    -432.99 Mb             5            --  
+                                            aten::addmm         6.49%      65.276ms        13.65%     137.341ms      71.532us      25.972ms         1.88%      25.972ms      13.527us           0 b           0 b     303.75 Mb     303.75 Mb          1920   1087163.597  
+                                    zo_parameter_update         0.09%     948.000us        11.94%     120.109ms      24.022ms       0.000us         0.00%      74.118ms      14.824ms           0 b           0 b           0 b     -25.00 Kb             5            --  
+                                              zo_update         3.93%      39.496ms        11.84%     119.161ms      23.832ms       0.000us         0.00%      74.118ms      14.824ms           0 b       2.02 Kb      25.00 Kb     -66.04 Gb             5            --  
+                                          aten::normal_         5.81%      58.420ms         9.10%      91.543ms       8.870us     138.707ms        10.06%     138.707ms      13.441us           0 b           0 b           0 b           0 b         10320            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.006s
+Self CUDA time total: 1.379s
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total MFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     131.000us       100.00%        1.006s     201.220ms       0.000us         0.00%     392.113ms      78.423ms           0 b           0 b      22.98 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.08%     825.000us        87.79%     883.263ms     176.653ms       0.000us         0.00%     317.985ms      63.597ms           0 b           8 b      22.98 Mb      -5.00 Kb             5            --  
+                                           zo_forward_1         0.00%       0.000us         0.00%       0.000us       0.000us     231.490ms        16.79%     231.490ms      46.298ms           0 b           0 b           0 b           0 b             5            --  
+                                       zo_perturb_-2eps         0.00%       0.000us         0.00%       0.000us       0.000us     169.460ms        12.29%     169.460ms      33.892ms           0 b           0 b           0 b           0 b             5            --  
+                                  zo_perturb_+eps_reset         0.00%       0.000us         0.00%       0.000us       0.000us     165.930ms        12.03%     165.930ms      33.186ms           0 b           0 b           0 b           0 b             5            --  
+                                        zo_perturb_+eps         0.00%       0.000us         0.00%       0.000us       0.000us     165.621ms        12.01%     165.621ms      33.124ms           0 b           0 b           0 b           0 b             5            --  
+                                          aten::normal_         5.81%      58.420ms         9.10%      91.543ms       8.870us     138.707ms        10.06%     138.707ms      13.441us           0 b           0 b           0 b           0 b         10320            --  
+void at::native::(anonymous namespace)::distribution...         0.00%       0.000us         0.00%       0.000us       0.000us     138.707ms        10.06%     138.707ms      13.441us           0 b           0 b           0 b           0 b         10320            --  
+                                           zo_forward_2         0.00%       0.000us         0.00%       0.000us       0.000us     134.656ms         9.77%     134.656ms      26.931ms           0 b           0 b           0 b           0 b             5            --  
+                                           aten::normal         3.28%      33.029ms        15.10%     151.923ms      14.721us       0.000us         0.00%     131.849ms      12.776us           0 b           0 b      98.74 Gb     -50.11 Mb         10320            --  
+                                              aten::mul        11.09%     111.548ms        17.23%     173.338ms       9.426us     129.758ms         9.41%     129.758ms       7.056us     -25.06 Kb     -25.06 Kb     172.92 Gb     172.92 Gb         18390     92823.583  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     129.748ms         9.41%     129.748ms       7.059us           0 b           0 b           0 b           0 b         18380            --  
+                                              zo_update         0.00%       0.000us         0.00%       0.000us       0.000us     119.147ms         8.64%     119.147ms      23.829ms           0 b           0 b           0 b           0 b             5            --  
+                                       zo_perturb_-2eps         5.70%      57.357ms        16.97%     170.758ms      34.152ms       0.000us         0.00%      92.672ms      18.534ms           0 b       7.74 Kb           0 b     -92.89 Gb             5            --  
+                                        zo_perturb_+eps         5.50%      55.375ms        16.54%     166.440ms      33.288ms       0.000us         0.00%      92.580ms      18.516ms           0 b       7.77 Kb           0 b     -91.12 Gb             5            --  
+                                  zo_perturb_+eps_reset         5.59%      56.282ms        16.62%     167.188ms      33.438ms       0.000us         0.00%      92.524ms      18.505ms           0 b       7.43 Kb           0 b     -92.15 Gb             5            --  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      84.437ms         6.12%      84.437ms       7.694us           0 b           0 b           0 b           0 b         10975            --  
+                                        training_step_2         0.02%     240.000us        20.59%     207.148ms     207.148ms       0.000us         0.00%      78.863ms      78.863ms           0 b           0 b       5.37 Mb           0 b             1            --  
+                                        training_step_3         0.02%     173.000us        18.03%     181.408ms     181.408ms       0.000us         0.00%      78.764ms      78.764ms           0 b           0 b       5.31 Mb           0 b             1            --  
+                                        training_step_4         0.02%     173.000us        18.09%     181.971ms     181.971ms       0.000us         0.00%      78.416ms      78.416ms           0 b           0 b       6.14 Mb           0 b             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.006s
+Self CUDA time total: 1.379s
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total MFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                              aten::mul        11.09%     111.548ms        17.23%     173.338ms       9.426us     129.758ms         9.41%     129.758ms       7.056us     -25.06 Kb     -25.06 Kb     172.92 Gb     172.92 Gb         18390     92823.583  
+                                            aten::empty         4.29%      43.145ms         4.29%      43.145ms       3.088us       0.000us         0.00%       0.000us       0.000us       2.46 Kb       2.46 Kb      99.01 Gb      99.01 Gb         13970            --  
+                                              aten::add         5.04%      50.666ms         8.11%      81.605ms       9.348us      64.339ms         4.67%      64.339ms       7.370us         -16 b         -16 b      74.16 Gb      74.16 Gb          8730     39812.565  
+                                              aten::sub         1.27%      12.815ms         2.07%      20.844ms       8.002us      21.012ms         1.52%      21.012ms       8.066us          -8 b          -8 b      24.34 Gb      24.34 Gb          2605            --  
+                                            aten::addmm         6.49%      65.276ms        13.65%     137.341ms      71.532us      25.972ms         1.88%      25.972ms      13.527us           0 b           0 b     303.75 Mb     303.75 Mb          1920   1087163.597  
+                                        aten::clamp_min         0.29%       2.906ms         0.42%       4.265ms      13.328us     334.000us         0.02%     334.000us       1.044us           0 b           0 b     135.00 Mb     135.00 Mb           320            --  
+                                              aten::bmm         0.95%       9.607ms         1.28%      12.875ms      20.117us       1.707ms         0.12%       1.707ms       2.667us           0 b           0 b      38.84 Mb      38.84 Mb           640       854.589  
+                                               aten::mm         0.04%     439.000us         0.91%       9.200ms     920.000us     658.000us         0.05%     658.000us      65.800us           0 b           0 b      22.97 Mb      22.97 Mb            10     55596.810  
+                                     aten::_log_softmax         0.01%     100.000us         0.02%     156.000us      15.600us     105.000us         0.01%     105.000us      10.500us           0 b           0 b      20.30 Mb      20.30 Mb            10            --  
+                                       aten::empty_like         0.27%       2.727ms         0.68%       6.816ms       5.164us       0.000us         0.00%       0.000us       0.000us           0 b           0 b     154.93 Mb      17.83 Mb          1320            --  
+                                       aten::contiguous         0.27%       2.757ms         1.86%      18.745ms      19.128us       0.000us         0.00%       2.207ms       2.252us           0 b           0 b     121.17 Mb      17.16 Mb           980            --  
+                                         aten::_softmax         0.23%       2.348ms         0.36%       3.580ms      11.188us     488.000us         0.04%     488.000us       1.525us           0 b           0 b      10.19 Mb      10.19 Mb           320            --  
+                                    aten::empty_strided         0.26%       2.589ms         0.26%       2.589ms       3.646us       0.000us         0.00%       0.000us       0.000us           0 b           0 b       5.29 Mb       5.29 Mb           710            --  
+                                          aten::maximum         0.26%       2.640ms         0.42%       4.262ms      13.319us       1.212ms         0.09%       1.212ms       3.788us           0 b           0 b       5.09 Mb       5.09 Mb           320            --  
+                                           aten::linear         1.41%      14.163ms        16.88%     169.834ms      87.997us       0.000us         0.00%      26.317ms      13.636us           0 b           0 b     326.72 Mb       2.87 Mb          1930            --  
+                                          aten::resize_         0.01%     141.000us         0.01%     141.000us       3.525us       0.000us         0.00%       0.000us       0.000us           0 b           0 b       2.11 Mb       2.11 Mb            40            --  
+                                      aten::log_softmax         0.01%      87.000us         0.02%     231.000us      23.100us       0.000us         0.00%      95.000us       9.500us           0 b           0 b      20.30 Mb       1.73 Mb            10            --  
+                                              aten::max         0.05%     526.000us         0.46%       4.649ms      14.528us       0.000us         0.00%       1.174ms       3.669us           0 b           0 b       5.09 Mb     164.50 Kb           320            --  
+                                          aten::softmax         0.05%     479.000us         0.40%       4.029ms      12.591us       0.000us         0.00%     484.000us       1.512us           0 b           0 b      10.19 Mb     113.00 Kb           320            --  
+                                               aten::to         0.09%     859.000us         1.49%      14.943ms      19.924us       0.000us         0.00%     666.000us       0.888us        -212 b        -120 b       5.28 Mb     112.50 Kb           750            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.006s
+Self CUDA time total: 1.379s
+
+
+✓ facebook/opt-2.7b complete
+
+>>> Profiling facebook/opt-6.7b (batch_size=1)
+
+2025-12-15 20:20:48,182 - INFO - PyTorch version 2.3.1 available.
+2025-12-15 20:20:48,447 - INFO - ================================================================================
+2025-12-15 20:20:48,447 - INFO - PROFILING MODEL: facebook/opt-6.7b
+2025-12-15 20:20:48,447 - INFO - Output directory: ./profiler_logs/profile_opt-6_7b
+2025-12-15 20:20:48,447 - INFO - ================================================================================
+2025-12-15 20:20:48,447 - INFO - Loading model: facebook/opt-6.7b
+Downloading shards:   0%|          | 0/2 [00:00<?, ?it/s]Downloading shards:  50%|█████     | 1/2 [02:05<02:05, 125.51s/it]Downloading shards: 100%|██████████| 2/2 [02:59<00:00, 83.48s/it] Downloading shards: 100%|██████████| 2/2 [02:59<00:00, 89.79s/it]
+2025-12-15 20:23:49,413 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.63s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.02s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.11s/it]
+2025-12-15 20:23:53,294 - INFO - Loading task: SST2
+2025-12-15 20:23:56,005 - INFO - Preparing training data...
+2025-12-15 20:23:56,066 - INFO - Number of trainable parameters: 6658473984
+2025-12-15 20:23:56,066 - INFO - Starting profiling for 5 steps...
+2025-12-15 20:23:56,066 - INFO - Output directory: ./profiler_logs/profile_opt-6_7b
+STAGE:2025-12-15 20:23:57 3364576:3364576 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+2025-12-15 20:23:57,327 - INFO - Step 1: loss = 8.7812
+2025-12-15 20:23:57,560 - INFO - Step 2: loss = 5.3828
+2025-12-15 20:23:57,795 - INFO - Step 3: loss = 7.0117
+2025-12-15 20:23:58,026 - INFO - Step 4: loss = 6.0000
+2025-12-15 20:23:58,256 - INFO - Step 5: loss = 4.9141
+STAGE:2025-12-15 20:23:58 3364576:3364576 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2025-12-15 20:23:58 3364576:3364576 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+2025-12-15 20:24:13,669 - INFO - Step 6: loss = 4.9102
+2025-12-15 20:24:13,672 - INFO - Chrome trace available at: ./profiler_logs/profile_opt-6_7b/cs-u-converge_3364576.1765851851745298775.pt.trace.json
+2025-12-15 20:24:13,672 - INFO - 
+================================================================================
+2025-12-15 20:24:13,672 - INFO - PROFILING SUMMARY
+2025-12-15 20:24:13,672 - INFO - ================================================================================
+2025-12-15 20:24:13,672 - INFO - 
+--- CPU Time (sorted by total time) ---
+2025-12-15 20:24:19,037 - INFO - 
+--- CUDA Time (sorted by total time) ---
+2025-12-15 20:24:24,374 - INFO - 
+--- Memory Usage (sorted by self CUDA memory) ---
+2025-12-15 20:24:45,722 - INFO - Summary saved to: ./profiler_logs/profile_opt-6_7b/opt-6_7b_profiler_summary.txt
+2025-12-15 20:24:45,722 - INFO - 
+================================================================================
+2025-12-15 20:24:45,722 - INFO - VISUALIZATION OPTIONS:
+2025-12-15 20:24:45,722 - INFO - ================================================================================
+2025-12-15 20:24:45,722 - INFO - 1. Chrome Trace Viewer: Open chrome://tracing and load .pt.trace.json files in ./profiler_logs/profile_opt-6_7b
+2025-12-15 20:24:45,722 - INFO - 2. TensorBoard: tensorboard --logdir=./profiler_logs/profile_opt-6_7b
+2025-12-15 20:24:45,722 - INFO - 3. Perfetto (online): https://ui.perfetto.dev/ - drag and drop the .pt.trace.json file
+2025-12-15 20:24:45,723 - INFO - ================================================================================
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     153.000us       100.00%        1.183s     236.631ms       0.000us         0.00%     868.078ms     173.616ms           0 b           0 b      16.47 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.08%     895.000us        77.21%     913.470ms     182.694ms       0.000us         0.00%     698.197ms     139.639ms           0 b           0 b      16.47 Mb      -5.00 Kb             5            --  
+                                        training_step_2         0.02%     267.000us        21.48%     254.178ms     254.178ms       0.000us         0.00%     173.533ms     173.533ms           0 b           0 b       7.64 Mb           0 b             1            --  
+                                  cudaStreamSynchronize        21.17%     250.498ms        21.17%     250.498ms     736.759us       0.000us         0.00%       0.000us       0.000us           0 b           0 b           0 b           0 b           340            --  
+                                        training_step_4         0.02%     223.000us        19.91%     235.545ms     235.545ms       0.000us         0.00%     173.693ms     173.693ms           0 b           0 b       2.50 Mb           0 b             1            --  
+                                        training_step_3         0.02%     235.000us        19.66%     232.657ms     232.657ms       0.000us         0.00%     173.633ms     173.633ms           0 b           0 b       1.73 Mb           0 b             1            --  
+                                        training_step_5         0.02%     215.000us        19.51%     230.804ms     230.804ms       0.000us         0.00%     173.650ms     173.650ms           0 b           0 b       2.69 Mb           0 b             1            --  
+                                        training_step_6         0.02%     214.000us        19.42%     229.816ms     229.816ms       0.000us         0.00%     173.569ms     173.569ms           0 b           0 b       1.92 Mb           0 b             1            --  
+                                           zo_forward_2         2.96%      35.019ms        17.42%     206.087ms      41.217ms       0.000us         0.00%      30.460ms       6.092ms           0 b        -292 b       8.60 Mb    -511.09 Mb             5            --  
+                                           zo_forward_1         3.93%      46.490ms        17.23%     203.916ms      40.783ms       0.000us         0.00%      30.515ms       6.103ms           0 b        -252 b       7.87 Mb    -506.55 Mb             5            --  
+                                              aten::mul         9.68%     114.496ms        15.08%     178.468ms       9.705us     296.869ms        14.55%     296.869ms      16.143us     -23.98 Kb     -23.98 Kb     434.03 Gb     434.03 Gb         18390       233.068  
+                                  zo_perturb_+eps_reset         4.86%      57.465ms        14.48%     171.362ms      34.272ms       0.000us         0.00%     212.403ms      42.481ms           0 b       6.63 Kb           0 b    -232.51 Gb             5            --  
+                                        zo_perturb_+eps         4.74%      56.095ms        14.05%     166.207ms      33.241ms       0.000us         0.00%     212.355ms      42.471ms           0 b       7.36 Kb           0 b    -231.04 Gb             5            --  
+                                       zo_perturb_-2eps         4.64%      54.944ms        13.92%     164.660ms      32.932ms       0.000us         0.00%     212.444ms      42.489ms           0 b       7.31 Kb           0 b    -232.70 Gb             5            --  
+                                            aten::copy_         0.93%      10.980ms        13.17%     155.877ms      77.167us       3.744ms         0.18%       3.744ms       1.853us           0 b           0 b           0 b           0 b          2020            --  
+                                       cudaLaunchKernel        13.05%     154.461ms        13.05%     154.461ms       3.502us       0.000us         0.00%       0.000us       0.000us           0 b           0 b           0 b           0 b         44110            --  
+                                           aten::normal         3.02%      35.743ms        12.95%     153.260ms      14.851us       0.000us         0.00%     285.742ms      27.688us           0 b           0 b     247.20 Gb    -864.23 Mb         10320            --  
+                                               aten::to         1.10%      13.064ms        12.58%     148.818ms     198.424us       0.000us         0.00%     647.000us       0.863us        -196 b        -136 b       7.48 Mb     332.50 Kb           750            --  
+                                         aten::_to_copy         0.28%       3.347ms        12.50%     147.842ms     211.203us       0.000us         0.00%     650.000us       0.929us         -92 b         -92 b       7.48 Mb           0 b           700            --  
+                                    zo_parameter_update         0.11%       1.252ms        10.84%     128.256ms      25.651ms       0.000us         0.00%     169.871ms      33.974ms           0 b           0 b           0 b     -40.00 Kb             5            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.183s
+Self CUDA time total: 2.041s
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     153.000us       100.00%        1.183s     236.631ms       0.000us         0.00%     868.078ms     173.616ms           0 b           0 b      16.47 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.08%     895.000us        77.21%     913.470ms     182.694ms       0.000us         0.00%     698.197ms     139.639ms           0 b           0 b      16.47 Mb      -5.00 Kb             5            --  
+void at::native::(anonymous namespace)::distribution...         0.00%       0.000us         0.00%       0.000us       0.000us     318.232ms        15.59%     318.232ms      29.856us           0 b           0 b           0 b           0 b         10659            --  
+                                          aten::normal_         4.84%      57.252ms         7.94%      93.900ms       9.099us     308.425ms        15.11%     308.425ms      29.886us           0 b           0 b           0 b           0 b         10320            --  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     302.237ms        14.81%     302.237ms      16.146us           0 b           0 b           0 b           0 b         18719            --  
+                                              aten::mul         9.68%     114.496ms        15.08%     178.468ms       9.705us     296.869ms        14.55%     296.869ms      16.143us     -23.98 Kb     -23.98 Kb     434.03 Gb     434.03 Gb         18390       233.068  
+                                           aten::normal         3.02%      35.743ms        12.95%     153.260ms      14.851us       0.000us         0.00%     285.742ms      27.688us           0 b           0 b     247.20 Gb    -864.23 Mb         10320            --  
+                                  zo_perturb_+eps_reset         0.00%       0.000us         0.00%       0.000us       0.000us     230.141ms        11.28%     230.141ms      46.028ms           0 b           0 b           0 b           0 b             5            --  
+                                       zo_perturb_-2eps         0.00%       0.000us         0.00%       0.000us       0.000us     230.102ms        11.28%     230.102ms      46.020ms           0 b           0 b           0 b           0 b             5            --  
+                                        zo_perturb_+eps         0.00%       0.000us         0.00%       0.000us       0.000us     229.905ms        11.27%     229.905ms      45.981ms           0 b           0 b           0 b           0 b             5            --  
+                                       zo_perturb_-2eps         4.64%      54.944ms        13.92%     164.660ms      32.932ms       0.000us         0.00%     212.444ms      42.489ms           0 b       7.31 Kb           0 b    -232.70 Gb             5            --  
+                                  zo_perturb_+eps_reset         4.86%      57.465ms        14.48%     171.362ms      34.272ms       0.000us         0.00%     212.403ms      42.481ms           0 b       6.63 Kb           0 b    -232.51 Gb             5            --  
+                                        zo_perturb_+eps         4.74%      56.095ms        14.05%     166.207ms      33.241ms       0.000us         0.00%     212.355ms      42.471ms           0 b       7.36 Kb           0 b    -231.04 Gb             5            --  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     209.309ms        10.26%     209.309ms      18.500us           0 b           0 b           0 b           0 b         11314            --  
+                                              zo_update         0.00%       0.000us         0.00%       0.000us       0.000us     183.417ms         8.99%     183.417ms      36.683ms           0 b           0 b           0 b           0 b             5            --  
+                                        training_step_4         0.02%     223.000us        19.91%     235.545ms     235.545ms       0.000us         0.00%     173.693ms     173.693ms           0 b           0 b       2.50 Mb           0 b             1            --  
+                                        training_step_5         0.02%     215.000us        19.51%     230.804ms     230.804ms       0.000us         0.00%     173.650ms     173.650ms           0 b           0 b       2.69 Mb           0 b             1            --  
+                                        training_step_3         0.02%     235.000us        19.66%     232.657ms     232.657ms       0.000us         0.00%     173.633ms     173.633ms           0 b           0 b       1.73 Mb           0 b             1            --  
+                                        training_step_6         0.02%     214.000us        19.42%     229.816ms     229.816ms       0.000us         0.00%     173.569ms     173.569ms           0 b           0 b       1.92 Mb           0 b             1            --  
+                                        training_step_2         0.02%     267.000us        21.48%     254.178ms     254.178ms       0.000us         0.00%     173.533ms     173.533ms           0 b           0 b       7.64 Mb           0 b             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.183s
+Self CUDA time total: 2.041s
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                              aten::mul         9.68%     114.496ms        15.08%     178.468ms       9.705us     296.869ms        14.55%     296.869ms      16.143us     -23.98 Kb     -23.98 Kb     434.03 Gb     434.03 Gb         18390       233.068  
+                                            aten::empty         3.52%      41.622ms         3.52%      41.622ms       2.984us       0.000us         0.00%       0.000us       0.000us       1.96 Kb       1.96 Kb     248.29 Gb     248.29 Gb         13950            --  
+                                              aten::add         4.11%      48.686ms         6.51%      76.986ms       8.819us     153.199ms         7.51%     153.199ms      17.549us           0 b           0 b     185.62 Gb     185.62 Gb          8730        99.925  
+                                              aten::sub         1.05%      12.460ms         1.86%      22.043ms       8.462us      50.559ms         2.48%      50.559ms      19.408us         -64 b         -64 b      60.98 Gb      60.98 Gb          2605            --  
+                                            aten::addmm         3.90%      46.101ms         5.21%      61.672ms      32.121us      44.590ms         2.18%      44.590ms      23.224us           0 b           0 b     373.00 Mb     376.00 Mb          1920      2113.124  
+                                        aten::clamp_min         0.25%       2.990ms         0.37%       4.426ms      13.831us     617.000us         0.03%     617.000us       1.928us           0 b           0 b     164.00 Mb     164.00 Mb           320            --  
+                                              aten::bmm         0.84%       9.944ms         1.13%      13.392ms      20.925us       1.777ms         0.09%       1.777ms       2.777us           0 b           0 b      48.28 Mb      48.28 Mb           640         1.931  
+                                               aten::mm         0.04%     430.000us         0.07%     793.000us      79.300us       1.074ms         0.05%       1.074ms     107.400us           0 b           0 b      16.47 Mb      16.47 Mb            10        67.540  
+                                     aten::_log_softmax         0.01%     110.000us         0.01%     171.000us      17.100us     126.000us         0.01%     126.000us      12.600us           0 b           0 b      15.60 Mb      15.60 Mb            10            --  
+                                       aten::contiguous         0.19%       2.217ms         1.55%      18.299ms      19.061us       0.000us         0.00%       1.957ms       2.039us           0 b           0 b     123.00 Mb      15.38 Mb           960            --  
+                                         aten::_softmax         0.20%       2.369ms         0.30%       3.592ms      11.225us     526.000us         0.03%     526.000us       1.644us           0 b           0 b      14.44 Mb      14.44 Mb           320            --  
+                                       aten::empty_like         0.21%       2.533ms         0.56%       6.655ms       5.119us       0.000us         0.00%       0.000us       0.000us           0 b           0 b     164.02 Mb       9.77 Mb          1300            --  
+                                    aten::empty_strided         0.23%       2.672ms         0.23%       2.672ms       3.763us       0.000us         0.00%       0.000us       0.000us           0 b           0 b       7.49 Mb       7.49 Mb           710            --  
+                                          aten::maximum         0.23%       2.699ms         0.37%       4.389ms      13.716us       1.267ms         0.06%       1.267ms       3.959us           0 b           0 b       7.28 Mb       7.28 Mb           320            --  
+                                          aten::resize_         0.01%     149.000us         0.01%     149.000us       3.725us       0.000us         0.00%       0.000us       0.000us           0 b           0 b       2.57 Mb       2.57 Mb            40            --  
+                                           aten::linear         1.20%      14.231ms         7.28%      86.112ms      44.618us       0.000us         0.00%      45.304ms      23.474us           0 b           0 b     389.47 Mb       1.66 Mb          1930            --  
+                                              aten::max         0.06%     713.000us         0.41%       4.857ms      15.178us       0.000us         0.00%       1.196ms       3.737us           0 b           0 b       7.28 Mb     437.00 Kb           320            --  
+                                               aten::to         1.10%      13.064ms        12.58%     148.818ms     198.424us       0.000us         0.00%     647.000us       0.863us        -196 b        -136 b       7.48 Mb     332.50 Kb           750            --  
+                                          aten::softmax         0.05%     567.000us         0.34%       4.080ms      12.750us       0.000us         0.00%     515.000us       1.609us           0 b           0 b      14.44 Mb      98.50 Kb           320            --  
+                                 aten::nll_loss_forward         0.01%     140.000us         0.02%     197.000us      19.700us      15.000us         0.00%      15.000us       1.500us           0 b           0 b      10.00 Kb      10.00 Kb            10            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.183s
+Self CUDA time total: 2.041s
+
+
+✓ facebook/opt-6.7b complete
+
+>>> Profiling facebook/opt-13b (batch_size=1)
+
+2025-12-15 20:24:55,882 - INFO - PyTorch version 2.3.1 available.
+2025-12-15 20:24:56,143 - INFO - ================================================================================
+2025-12-15 20:24:56,144 - INFO - PROFILING MODEL: facebook/opt-13b
+2025-12-15 20:24:56,144 - INFO - Output directory: ./profiler_logs/profile_opt-13b
+2025-12-15 20:24:56,144 - INFO - ================================================================================
+2025-12-15 20:24:56,144 - INFO - Loading model: facebook/opt-13b
+Downloading shards:   0%|          | 0/3 [00:00<?, ?it/s]Downloading shards:  33%|███▎      | 1/3 [02:14<04:29, 134.77s/it]Downloading shards:  67%|██████▋   | 2/3 [04:13<02:05, 125.24s/it]Downloading shards: 100%|██████████| 3/3 [05:37<00:00, 106.41s/it]Downloading shards: 100%|██████████| 3/3 [05:37<00:00, 112.44s/it]
+2025-12-15 20:30:35,180 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:03,  1.79s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:03<00:01,  1.83s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:04<00:00,  1.56s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:04<00:00,  1.63s/it]
+2025-12-15 20:30:41,764 - INFO - Loading task: SST2
+2025-12-15 20:30:45,198 - INFO - Preparing training data...
+2025-12-15 20:30:45,266 - INFO - Number of trainable parameters: 12853473280
+2025-12-15 20:30:45,266 - INFO - Starting profiling for 5 steps...
+2025-12-15 20:30:45,266 - INFO - Output directory: ./profiler_logs/profile_opt-13b
+STAGE:2025-12-15 20:30:46 3371903:3371903 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+2025-12-15 20:30:46,788 - INFO - Step 1: loss = 9.8203
+2025-12-15 20:30:47,180 - INFO - Step 2: loss = 5.2930
+2025-12-15 20:30:47,571 - INFO - Step 3: loss = 7.0703
+2025-12-15 20:30:47,961 - INFO - Step 4: loss = 5.9570
+2025-12-15 20:30:48,354 - INFO - Step 5: loss = 4.8750
+STAGE:2025-12-15 20:30:48 3371903:3371903 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2025-12-15 20:30:48 3371903:3371903 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+2025-12-15 20:31:09,186 - INFO - Step 6: loss = 5.2734
+2025-12-15 20:31:09,188 - INFO - Chrome trace available at: ./profiler_logs/profile_opt-13b/cs-u-converge_3371903.1765852266693324518.pt.trace.json
+2025-12-15 20:31:09,189 - INFO - 
+================================================================================
+2025-12-15 20:31:09,189 - INFO - PROFILING SUMMARY
+2025-12-15 20:31:09,189 - INFO - ================================================================================
+2025-12-15 20:31:09,189 - INFO - 
+--- CPU Time (sorted by total time) ---
+2025-12-15 20:31:16,239 - INFO - 
+--- CUDA Time (sorted by total time) ---
+2025-12-15 20:31:23,122 - INFO - 
+--- Memory Usage (sorted by self CUDA memory) ---
+2025-12-15 20:31:50,472 - INFO - Summary saved to: ./profiler_logs/profile_opt-13b/opt-13b_profiler_summary.txt
+2025-12-15 20:31:50,472 - INFO - 
+================================================================================
+2025-12-15 20:31:50,472 - INFO - VISUALIZATION OPTIONS:
+2025-12-15 20:31:50,472 - INFO - ================================================================================
+2025-12-15 20:31:50,472 - INFO - 1. Chrome Trace Viewer: Open chrome://tracing and load .pt.trace.json files in ./profiler_logs/profile_opt-13b
+2025-12-15 20:31:50,472 - INFO - 2. TensorBoard: tensorboard --logdir=./profiler_logs/profile_opt-13b
+2025-12-15 20:31:50,472 - INFO - 3. Perfetto (online): https://ui.perfetto.dev/ - drag and drop the .pt.trace.json file
+2025-12-15 20:31:50,472 - INFO - ================================================================================
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     198.000us       100.00%        1.994s     398.758ms       0.000us         0.00%        1.614s     322.808ms           0 b           0 b      15.73 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.05%     953.000us        73.06%        1.457s     291.331ms       0.000us         0.00%        1.296s     259.203ms           0 b           8 b      15.73 Mb      -5.00 Kb             5            --  
+                                  cudaStreamSynchronize        25.72%     512.791ms        25.72%     512.791ms       1.221ms       0.000us         0.00%       0.000us       0.000us           0 b           0 b           0 b           0 b           420            --  
+                                       cudaLaunchKernel        25.48%     508.005ms        25.48%     508.005ms       9.238us       0.000us         0.00%       0.000us       0.000us           0 b           0 b           0 b           0 b         54990            --  
+                                        training_step_2         0.01%     246.000us        21.51%     428.772ms     428.772ms       0.000us         0.00%     322.339ms     322.339ms           0 b           0 b       6.91 Mb           0 b             1            --  
+                                        training_step_6         0.01%     232.000us        19.69%     392.564ms     392.564ms       0.000us         0.00%     322.777ms     322.777ms           0 b           0 b       1.92 Mb           0 b             1            --  
+                                        training_step_3         0.01%     230.000us        19.64%     391.664ms     391.664ms       0.000us         0.00%     323.056ms     323.056ms           0 b           0 b       1.73 Mb           0 b             1            --  
+                                        training_step_4         0.01%     292.000us        19.59%     390.524ms     390.524ms       0.000us         0.00%     323.018ms     323.018ms           0 b           0 b       2.49 Mb           0 b             1            --  
+                                        training_step_5         0.01%     230.000us        19.56%     390.069ms     390.069ms       0.000us         0.00%     322.849ms     322.849ms           0 b           0 b       2.69 Mb           0 b             1            --  
+                                            aten::copy_         0.69%      13.715ms        18.20%     362.858ms     145.143us       4.950ms         0.14%       4.950ms       1.980us         -20 b         -20 b           0 b           0 b          2500            --  
+                                               aten::to         0.07%       1.453ms        17.78%     354.462ms     389.519us       0.000us         0.00%     824.000us       0.905us        -256 b        -152 b      11.57 Mb     411.50 Kb           910            --  
+                                         aten::_to_copy         0.22%       4.318ms        17.72%     353.266ms     410.774us       0.000us         0.00%     817.000us       0.950us        -120 b        -116 b      11.57 Mb           0 b           860            --  
+                                              aten::mul         6.69%     133.362ms        17.67%     352.313ms      15.351us     560.212ms        15.57%     560.212ms      24.410us     -28.09 Kb     -28.09 Kb     836.89 Gb     836.89 Gb         22950       449.905  
+                                           zo_forward_1         2.89%      57.574ms        17.16%     342.219ms      68.444ms       0.000us         0.00%      51.008ms      10.202ms           0 b        -320 b       7.87 Mb    -791.26 Mb             5            --  
+                                           zo_forward_2         2.89%      57.694ms        16.82%     335.370ms      67.074ms       0.000us         0.00%      50.945ms      10.189ms           0 b        -356 b       7.87 Mb    -789.95 Mb             5            --  
+                                    zo_parameter_update         0.06%       1.158ms        16.28%     324.570ms      64.914ms       0.000us         0.00%     318.016ms      63.603ms           0 b           0 b           0 b     -50.00 Kb             5            --  
+                                              zo_update         2.50%      49.942ms        16.22%     323.412ms      64.682ms       0.000us         0.00%     318.016ms      63.603ms           0 b       3.50 Kb      50.00 Kb    -316.71 Gb             5            --  
+                                           aten::normal         2.34%      46.625ms        13.74%     274.011ms      21.274us       0.000us         0.00%     546.967ms      42.466us           0 b           0 b     477.51 Gb      -1.32 Gb         12880            --  
+                                       zo_perturb_-2eps         3.53%      70.354ms        13.07%     260.557ms      52.111ms       0.000us         0.00%     397.961ms      79.592ms           0 b       8.23 Kb           0 b    -437.32 Gb             5            --  
+                                        zo_perturb_+eps         3.50%      69.687ms        12.98%     258.703ms      51.741ms       0.000us         0.00%     398.225ms      79.645ms           0 b       8.01 Kb           0 b    -435.56 Gb             5            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.994s
+Self CUDA time total: 3.597s
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          ProfilerStep*         0.01%     198.000us       100.00%        1.994s     398.758ms       0.000us         0.00%        1.614s     322.808ms           0 b           0 b      15.73 Mb           0 b             5            --  
+                                 zo_gradient_estimation         0.05%     953.000us        73.06%        1.457s     291.331ms       0.000us         0.00%        1.296s     259.203ms           0 b           8 b      15.73 Mb      -5.00 Kb             5            --  
+void at::native::(anonymous namespace)::distribution...         0.00%       0.000us         0.00%       0.000us       0.000us     590.081ms        16.41%     590.081ms      44.652us           0 b           0 b           0 b           0 b         13215            --  
+                                          aten::normal_         3.62%      72.092ms         9.97%     198.737ms      15.430us     575.327ms        16.00%     575.327ms      44.668us           0 b           0 b           0 b           0 b         12880            --  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     568.419ms        15.80%     568.419ms      24.421us           0 b           0 b           0 b           0 b         23276            --  
+                                              aten::mul         6.69%     133.362ms        17.67%     352.313ms      15.351us     560.212ms        15.57%     560.212ms      24.410us     -28.09 Kb     -28.09 Kb     836.89 Gb     836.89 Gb         22950       449.905  
+                                           aten::normal         2.34%      46.625ms        13.74%     274.011ms      21.274us       0.000us         0.00%     546.967ms      42.466us           0 b           0 b     477.51 Gb      -1.32 Gb         12880            --  
+                                        zo_perturb_+eps         0.00%       0.000us         0.00%       0.000us       0.000us     421.286ms        11.71%     421.286ms      84.257ms           0 b           0 b           0 b           0 b             5            --  
+                                  zo_perturb_+eps_reset         0.00%       0.000us         0.00%       0.000us       0.000us     421.149ms        11.71%     421.149ms      84.230ms           0 b           0 b           0 b           0 b             5            --  
+                                       zo_perturb_-2eps         0.00%       0.000us         0.00%       0.000us       0.000us     421.090ms        11.71%     421.090ms      84.218ms           0 b           0 b           0 b           0 b             5            --  
+                                        zo_perturb_+eps         3.50%      69.687ms        12.98%     258.703ms      51.741ms       0.000us         0.00%     398.225ms      79.645ms           0 b       8.01 Kb           0 b    -435.56 Gb             5            --  
+                                       zo_perturb_-2eps         3.53%      70.354ms        13.07%     260.557ms      52.111ms       0.000us         0.00%     397.961ms      79.592ms           0 b       8.23 Kb           0 b    -437.32 Gb             5            --  
+                                  zo_perturb_+eps_reset         3.46%      69.060ms        12.97%     258.512ms      51.702ms       0.000us         0.00%     397.854ms      79.571ms           0 b       8.39 Kb           0 b    -438.29 Gb             5            --  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     387.760ms        10.78%     387.760ms      27.636us           0 b           0 b           0 b           0 b         14031            --  
+                                              zo_update         0.00%       0.000us         0.00%       0.000us       0.000us     335.777ms         9.34%     335.777ms      67.155ms           0 b           0 b           0 b           0 b             5            --  
+                                        training_step_3         0.01%     230.000us        19.64%     391.664ms     391.664ms       0.000us         0.00%     323.056ms     323.056ms           0 b           0 b       1.73 Mb           0 b             1            --  
+                                        training_step_4         0.01%     292.000us        19.59%     390.524ms     390.524ms       0.000us         0.00%     323.018ms     323.018ms           0 b           0 b       2.49 Mb           0 b             1            --  
+                                        training_step_5         0.01%     230.000us        19.56%     390.069ms     390.069ms       0.000us         0.00%     322.849ms     322.849ms           0 b           0 b       2.69 Mb           0 b             1            --  
+                                        training_step_6         0.01%     232.000us        19.69%     392.564ms     392.564ms       0.000us         0.00%     322.777ms     322.777ms           0 b           0 b       1.92 Mb           0 b             1            --  
+                                        training_step_2         0.01%     246.000us        21.51%     428.772ms     428.772ms       0.000us         0.00%     322.339ms     322.339ms           0 b           0 b       6.91 Mb           0 b             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.994s
+Self CUDA time total: 3.597s
+
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total GFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                              aten::mul         6.69%     133.362ms        17.67%     352.313ms      15.351us     560.212ms        15.57%     560.212ms      24.410us     -28.09 Kb     -28.09 Kb     836.89 Gb     836.89 Gb         22950       449.905  
+                                            aten::empty         2.66%      53.018ms         2.66%      53.018ms       3.049us       0.000us         0.00%       0.000us       0.000us       1.83 Kb       1.83 Kb     479.21 Gb     479.21 Gb         17390            --  
+                                              aten::add         3.44%      68.513ms         7.17%     142.880ms      13.120us     284.846ms         7.92%     284.846ms      26.157us         -16 b         -16 b     357.89 Gb     357.89 Gb         10890       192.876  
+                                              aten::sub         0.92%      18.288ms         4.30%      85.831ms      26.450us      94.342ms         2.62%      94.342ms      29.073us        -168 b        -168 b     116.44 Gb     116.44 Gb          3245            --  
+                                            aten::addmm         2.92%      58.159ms         3.97%      79.128ms      32.970us      79.312ms         2.21%      79.312ms      33.047us           0 b           0 b     576.56 Mb     576.56 Mb          2400      4127.195  
+                                        aten::clamp_min         0.19%       3.842ms         0.28%       5.619ms      14.047us     799.000us         0.02%     799.000us       1.998us           0 b           0 b     256.25 Mb     256.25 Mb           400            --  
+                                              aten::bmm         0.61%      12.078ms         0.82%      16.425ms      20.531us       2.728ms         0.08%       2.728ms       3.410us           0 b           0 b      75.39 Mb      75.39 Mb           800         3.018  
+                                       aten::empty_like         0.17%       3.400ms         0.43%       8.621ms       5.322us       0.000us         0.00%       0.000us       0.000us           0 b           0 b     256.27 Mb      30.79 Mb          1620            --  
+                                         aten::_softmax         0.14%       2.867ms         0.21%       4.252ms      10.630us     725.000us         0.02%     725.000us       1.812us           0 b           0 b      22.58 Mb      22.58 Mb           400            --  
+                                       aten::contiguous         0.13%       2.645ms         1.14%      22.808ms      19.007us       0.000us         0.00%       2.648ms       2.207us           0 b           0 b     192.19 Mb      21.63 Mb          1200            --  
+                                               aten::mm         0.02%     426.000us         0.04%     801.000us      80.100us       1.310ms         0.04%       1.310ms     131.000us           0 b           0 b      15.73 Mb      15.73 Mb            10        84.425  
+                                     aten::_log_softmax         0.01%     122.000us         0.01%     182.000us      18.200us     129.000us         0.00%     129.000us      12.900us           0 b           0 b      14.84 Mb      14.84 Mb            10            --  
+                                    aten::empty_strided         0.16%       3.247ms         0.16%       3.247ms       3.732us       0.000us         0.00%       0.000us       0.000us           0 b           0 b      11.57 Mb      11.57 Mb           870            --  
+                                          aten::maximum         0.17%       3.345ms         0.27%       5.465ms      13.662us       1.599ms         0.04%       1.599ms       3.998us           0 b           0 b      11.33 Mb      11.33 Mb           400            --  
+                                      aten::log_softmax         0.01%     101.000us         0.01%     262.000us      26.200us       0.000us         0.00%     103.000us      10.300us           0 b           0 b      14.84 Mb       4.67 Mb            10            --  
+                                          aten::resize_         0.01%     143.000us         0.01%     143.000us       3.575us       0.000us         0.00%       0.000us       0.000us           0 b           0 b       3.21 Mb       3.21 Mb            40            --  
+                                           aten::linear         0.91%      18.098ms         5.51%     109.852ms      45.582us       0.000us         0.00%      80.100ms      33.237us           0 b           0 b     592.29 Mb       2.43 Mb          2410            --  
+                                              aten::max         0.04%     831.000us         0.30%       6.020ms      15.050us       0.000us         0.00%       1.529ms       3.822us           0 b           0 b      11.33 Mb     437.00 Kb           400            --  
+                                               aten::to         0.07%       1.453ms        17.78%     354.462ms     389.519us       0.000us         0.00%     824.000us       0.905us        -256 b        -152 b      11.57 Mb     411.50 Kb           910            --  
+                                          aten::softmax         0.03%     660.000us         0.24%       4.826ms      12.065us       0.000us         0.00%     713.000us       1.782us           0 b           0 b      22.58 Mb     364.50 Kb           400            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 1.994s
+Self CUDA time total: 3.597s
+
+
+✓ facebook/opt-13b complete
+
+============================================================================
+All profiles complete!
+View with: tensorboard --logdir=./profiler_logs
+============================================================================

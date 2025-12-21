@@ -63,7 +63,30 @@ class ProfilerArguments:
     output_dir: str = "./profiler_logs"
     profile_memory: bool = True
     with_stack: bool = True  # Include Python call stack in profile
+    torch_compile: bool = False  # Use torch.compile() on model
+    compile_mode: str = "default"  # torch.compile mode: default, reduce-overhead, max-autotune
+    memory_timeline: bool = False  # Record detailed memory allocation timeline
+    export_memory_snapshot: bool = False  # Export memory snapshot for visualization
     
+    def get_model_short_name(self) -> str:
+        """Extract short model name for output naming"""
+        # facebook/opt-350m -> opt-350m
+        # facebook/opt-2.7b -> opt-2.7b
+        name = self.model_name.split("/")[-1]
+        return name.lower().replace(".", "_")
+    
+    def get_output_subdir(self) -> str:
+        """Get model-specific output subdirectory"""
+        model_name = self.get_model_short_name()
+        compile_suffix = "_compiled" if self.torch_compile else ""
+        return os.path.join(self.output_dir, f"profile_mezo_{model_name}{compile_suffix}")
+    
+    def get_trace_filename(self) -> str:
+        """Get trace filename with model name and compile status"""
+        model_name = self.get_model_short_name()
+        compile_suffix = "_compiled" if self.torch_compile else ""
+        return f"mezo_{model_name}{compile_suffix}.pt.trace.json"
+
 
 def set_seed(seed: int = 42):
     random.seed(seed)
@@ -245,8 +268,15 @@ def run_profiling(args: ProfilerArguments):
     """Main profiling function"""
     set_seed(42)
     
-    # Create output directory
-    os.makedirs(args.output_dir, exist_ok=True)
+    # Create model-specific output directory
+    output_subdir = args.get_output_subdir()
+    os.makedirs(output_subdir, exist_ok=True)
+    
+    model_short_name = args.get_model_short_name()
+    logger.info(f"="*80)
+    logger.info(f"PROFILING MODEL: {args.model_name}")
+    logger.info(f"Output directory: {output_subdir}")
+    logger.info(f"="*80)
     
     # Load model
     logger.info(f"Loading model: {args.model_name}")
@@ -260,6 +290,12 @@ def run_profiling(args: ProfilerArguments):
         device_map='auto'
     )
     model.eval()
+    
+    # Apply torch.compile if requested
+    if args.torch_compile:
+        logger.info(f"Applying torch.compile with mode='{args.compile_mode}'...")
+        model = torch.compile(model, mode=args.compile_mode)
+        logger.info("Model compiled successfully")
     
     tokenizer = AutoTokenizer.from_pretrained(args.model_name, use_fast=False)
     if "opt" in args.model_name:
@@ -298,13 +334,31 @@ def run_profiling(args: ProfilerArguments):
     activities = [ProfilerActivity.CPU, ProfilerActivity.CUDA]
     
     logger.info(f"Starting profiling for {args.num_steps} steps...")
-    logger.info(f"Output directory: {args.output_dir}")
+    logger.info(f"Output directory: {output_subdir}")
+    
+    # Start memory timeline recording if requested
+    if args.memory_timeline:
+        logger.info("Starting CUDA memory history recording...")
+        # PyTorch 2.3.x API: enabled, context, stacks, max_entries, device
+        torch.cuda.memory._record_memory_history(
+            enabled="all",
+            context="all",
+            stacks="python",
+            max_entries=100000,
+        )
+    
+    # Track peak memory per phase
+    memory_stats = {
+        'peak_allocated': [],
+        'peak_reserved': [],
+        'phase_memory': {}
+    }
     
     # PyTorch Profiler
     with profile(
         activities=activities,
         schedule=profiler_schedule,
-        on_trace_ready=tensorboard_trace_handler(args.output_dir),
+        on_trace_ready=tensorboard_trace_handler(output_subdir),
         record_shapes=True,
         profile_memory=args.profile_memory,
         with_stack=args.with_stack,
@@ -330,24 +384,44 @@ def run_profiling(args: ProfilerArguments):
                 
                 if step >= 2:  # Skip wait and warmup
                     logger.info(f"Step {step-1}: loss = {loss.item():.4f}")
+                
+                # Track memory stats
+                if torch.cuda.is_available():
+                    memory_stats['peak_allocated'].append(torch.cuda.max_memory_allocated() / 1024**2)
+                    memory_stats['peak_reserved'].append(torch.cuda.max_memory_reserved() / 1024**2)
             
             prof.step()
     
+    # Export memory snapshot if requested
+    if args.export_memory_snapshot and torch.cuda.is_available():
+        snapshot_path = os.path.join(output_subdir, f"{model_short_name}_memory_snapshot.pickle")
+        try:
+            torch.cuda.memory._dump_snapshot(snapshot_path)
+            logger.info(f"Memory snapshot saved to: {snapshot_path}")
+            logger.info("Visualize at: https://pytorch.org/memory_viz")
+        except Exception as e:
+            logger.warning(f"Failed to dump memory snapshot: {e}")
+    
+    # Stop memory history recording
+    if args.memory_timeline:
+        torch.cuda.memory._record_memory_history(enabled=None)
+        logger.info("Memory history recording stopped")
+    
     # Export Chrome trace explicitly for visualization
-    chrome_trace_path = os.path.join(args.output_dir, "dizo_chrome_trace.json")
+    chrome_trace_path = os.path.join(output_subdir, args.get_trace_filename())
     try:
         prof.export_chrome_trace(chrome_trace_path)
         logger.info(f"Chrome trace exported to: {chrome_trace_path}")
     except RuntimeError:
         # tensorboard_trace_handler may have already saved, find those files
         import glob
-        trace_files = glob.glob(os.path.join(args.output_dir, "*.pt.trace.json"))
+        trace_files = glob.glob(os.path.join(output_subdir, "*.pt.trace.json"))
         if trace_files:
             chrome_trace_path = trace_files[-1]
             logger.info(f"Chrome trace available at: {chrome_trace_path}")
     
     # Also export stacks if available (useful for flame graphs)
-    stacks_path = os.path.join(args.output_dir, "dizo_stacks.txt")
+    stacks_path = os.path.join(output_subdir, f"{model_short_name}_stacks.txt")
     try:
         prof.export_stacks(stacks_path, "self_cuda_time_total")
         logger.info(f"CUDA stacks exported to: {stacks_path} (can be used with flamegraph.pl)")
@@ -373,11 +447,16 @@ def run_profiling(args: ProfilerArguments):
         print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=20))
     
     # Save text summary
-    summary_path = os.path.join(args.output_dir, "profiler_summary.txt")
+    summary_path = os.path.join(output_subdir, f"{model_short_name}_profiler_summary.txt")
     with open(summary_path, 'w') as f:
         f.write("="*80 + "\n")
-        f.write("DiZO PROFILING SUMMARY\n")
+        f.write(f"DiZO PROFILING SUMMARY - {args.model_name}\n")
         f.write("="*80 + "\n\n")
+        f.write(f"Model: {args.model_name}\n")
+        f.write(f"Task: {args.task_name}\n")
+        f.write(f"Batch Size: {args.batch_size}\n")
+        f.write(f"Steps: {args.num_steps}\n")
+        f.write("\n")
         
         f.write("--- CPU Time (sorted by total time) ---\n")
         f.write(prof.key_averages().table(sort_by="cpu_time_total", row_limit=50))
@@ -393,13 +472,43 @@ def run_profiling(args: ProfilerArguments):
     
     logger.info(f"Summary saved to: {summary_path}")
     
+    # Print memory statistics
+    if torch.cuda.is_available() and memory_stats['peak_allocated']:
+        logger.info("\n" + "="*80)
+        logger.info("MEMORY STATISTICS")
+        logger.info("="*80)
+        logger.info(f"Peak Allocated Memory: {max(memory_stats['peak_allocated']):.2f} MB")
+        logger.info(f"Peak Reserved Memory: {max(memory_stats['peak_reserved']):.2f} MB")
+        logger.info(f"Avg Allocated per Step: {np.mean(memory_stats['peak_allocated']):.2f} MB")
+        
+        # Save memory timeline plot
+        try:
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots(figsize=(12, 4))
+            steps = range(len(memory_stats['peak_allocated']))
+            ax.plot(steps, memory_stats['peak_allocated'], 'b-', label='Allocated', linewidth=2)
+            ax.plot(steps, memory_stats['peak_reserved'], 'r--', label='Reserved', linewidth=2)
+            ax.set_xlabel('Step')
+            ax.set_ylabel('Memory (MB)')
+            ax.set_title('CUDA Memory Usage Over Training Steps')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            memory_plot_path = os.path.join(output_subdir, f"{model_short_name}_memory_timeline.png")
+            plt.savefig(memory_plot_path, dpi=150, bbox_inches='tight')
+            plt.close()
+            logger.info(f"Memory timeline plot saved to: {memory_plot_path}")
+        except Exception as e:
+            logger.warning(f"Failed to create memory plot: {e}")
+    
     logger.info("\n" + "="*80)
     logger.info("VISUALIZATION OPTIONS:")
     logger.info("="*80)
-    logger.info(f"1. Chrome Trace Viewer: Open chrome://tracing and load .pt.trace.json files in {args.output_dir}")
-    logger.info(f"2. TensorBoard: tensorboard --logdir={args.output_dir}")
+    logger.info(f"1. Chrome Trace Viewer: Open chrome://tracing and load .pt.trace.json files in {output_subdir}")
+    logger.info(f"2. TensorBoard: tensorboard --logdir={output_subdir}")
     logger.info(f"3. Perfetto (online): https://ui.perfetto.dev/ - drag and drop the .pt.trace.json file")
     logger.info("="*80)
+    
+    return output_subdir
 
 
 def main():
@@ -426,6 +535,15 @@ def main():
                        help="Profile memory usage")
     parser.add_argument("--with_stack", action="store_true", default=False,
                        help="Include Python stack traces (slower but more detailed)")
+    parser.add_argument("--torch_compile", action="store_true", default=False,
+                       help="Use torch.compile() on the model for potential speedup")
+    parser.add_argument("--compile_mode", type=str, default="default",
+                       choices=["default", "reduce-overhead", "max-autotune"],
+                       help="torch.compile mode (default: default)")
+    parser.add_argument("--memory_timeline", action="store_true", default=False,
+                       help="Record detailed CUDA memory allocation timeline")
+    parser.add_argument("--export_memory_snapshot", action="store_true", default=False,
+                       help="Export memory snapshot for visualization at pytorch.org/memory_viz")
     
     args_parsed = parser.parse_args()
     
@@ -441,7 +559,11 @@ def main():
         load_float16=args_parsed.load_float16,
         output_dir=args_parsed.output_dir,
         profile_memory=args_parsed.profile_memory,
-        with_stack=args_parsed.with_stack
+        with_stack=args_parsed.with_stack,
+        torch_compile=args_parsed.torch_compile,
+        compile_mode=args_parsed.compile_mode,
+        memory_timeline=args_parsed.memory_timeline,
+        export_memory_snapshot=args_parsed.export_memory_snapshot
     )
     
     run_profiling(args)
