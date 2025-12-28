@@ -25,6 +25,7 @@ from typing import Optional
 
 import numpy as np
 import torch
+import torch._dynamo
 import torch.nn.functional as F
 from torch import nn
 from torch.nn import CrossEntropyLoss
@@ -65,6 +66,7 @@ class ProfilerArguments:
     with_stack: bool = True  # Include Python call stack in profile
     torch_compile: bool = False  # Use torch.compile() on model
     compile_mode: str = "default"  # torch.compile mode: default, reduce-overhead, max-autotune
+    compile_warmup_steps: int = 3  # Warmup steps to complete torch.compile before profiling
     memory_timeline: bool = False  # Record detailed memory allocation timeline
     export_memory_snapshot: bool = False  # Export memory snapshot for visualization
     
@@ -146,6 +148,127 @@ class MeZOTrainer:
             (name, param) for name, param in model.named_parameters() if param.requires_grad
         ]
         logger.info(f"Number of trainable parameters: {sum(p.numel() for _, p in self.named_parameters_to_optim)}")
+    
+    def get_parameter_shapes(self) -> list:
+        """
+        Get shapes/dimensions of all parameters to be perturbed and updated.
+        Returns a list of dicts with parameter info.
+        """
+        param_info = []
+        total_params = 0
+        total_memory_bytes = 0
+        
+        for name, param in self.named_parameters_to_optim:
+            shape = tuple(param.shape)
+            numel = param.numel()
+            dtype = param.dtype
+            # Calculate memory in bytes (fp16=2, fp32=4, bf16=2)
+            bytes_per_elem = 2 if dtype in [torch.float16, torch.bfloat16] else 4
+            memory_bytes = numel * bytes_per_elem
+            
+            param_info.append({
+                'name': name,
+                'shape': shape,
+                'numel': numel,
+                'dtype': str(dtype),
+                'memory_mb': memory_bytes / (1024 * 1024),
+                'ndim': len(shape)
+            })
+            total_params += numel
+            total_memory_bytes += memory_bytes
+        
+        # Add summary at the end
+        param_info.append({
+            'name': '--- TOTAL ---',
+            'shape': None,
+            'numel': total_params,
+            'dtype': 'N/A',
+            'memory_mb': total_memory_bytes / (1024 * 1024),
+            'ndim': None
+        })
+        
+        return param_info
+    
+    def save_parameter_shapes(self, output_path: str):
+        """
+        Save parameter shapes to a text file.
+        """
+        param_info = self.get_parameter_shapes()
+        
+        with open(output_path, 'w') as f:
+            f.write("=" * 120 + "\n")
+            f.write("PARAMETER SHAPES FOR ZO PERTURBATION AND UPDATE\n")
+            f.write("=" * 120 + "\n\n")
+            f.write(f"Model: {self.args.model_name}\n")
+            f.write(f"Total trainable parameters: {len(self.named_parameters_to_optim)}\n\n")
+            
+            # Header
+            f.write(f"{'No.':<6} {'Parameter Name':<60} {'Shape':<25} {'Elements':>15} {'Memory (MB)':>12} {'Dtype':<15}\n")
+            f.write("-" * 120 + "\n")
+            
+            for i, info in enumerate(param_info[:-1]):  # Exclude summary row
+                shape_str = str(info['shape'])
+                f.write(f"{i+1:<6} {info['name']:<60} {shape_str:<25} {info['numel']:>15,} {info['memory_mb']:>12.4f} {info['dtype']:<15}\n")
+            
+            # Summary
+            f.write("-" * 120 + "\n")
+            summary = param_info[-1]
+            f.write(f"{'TOTAL':<6} {'':<60} {'':<25} {summary['numel']:>15,} {summary['memory_mb']:>12.4f}\n")
+            f.write("=" * 120 + "\n")
+            
+            # Additional statistics
+            f.write("\n\nPARAMETER STATISTICS BY LAYER TYPE:\n")
+            f.write("-" * 60 + "\n")
+            
+            layer_stats = {}
+            for info in param_info[:-1]:
+                # Extract layer type from name (e.g., 'model.decoder.layers.0.self_attn.q_proj.weight' -> 'self_attn.q_proj')
+                name_parts = info['name'].split('.')
+                if 'weight' in name_parts[-1] or 'bias' in name_parts[-1]:
+                    layer_type = '.'.join(name_parts[-2:]) if len(name_parts) >= 2 else name_parts[-1]
+                else:
+                    layer_type = name_parts[-1]
+                
+                if layer_type not in layer_stats:
+                    layer_stats[layer_type] = {'count': 0, 'numel': 0, 'memory_mb': 0}
+                layer_stats[layer_type]['count'] += 1
+                layer_stats[layer_type]['numel'] += info['numel']
+                layer_stats[layer_type]['memory_mb'] += info['memory_mb']
+            
+            f.write(f"{'Layer Type':<40} {'Count':>10} {'Elements':>20} {'Memory (MB)':>15}\n")
+            f.write("-" * 85 + "\n")
+            for layer_type, stats in sorted(layer_stats.items(), key=lambda x: -x[1]['numel']):
+                f.write(f"{layer_type:<40} {stats['count']:>10} {stats['numel']:>20,} {stats['memory_mb']:>15.4f}\n")
+        
+        logger.info(f"Parameter shapes saved to: {output_path}")
+        return param_info
+    
+    def print_parameter_shapes_summary(self):
+        """Print a summary of parameter shapes to the console."""
+        param_info = self.get_parameter_shapes()
+        
+        logger.info("\n" + "=" * 80)
+        logger.info("PARAMETER SHAPES SUMMARY (for ZO perturbation)")
+        logger.info("=" * 80)
+        
+        # Group by shape
+        shape_groups = {}
+        for info in param_info[:-1]:
+            shape = info['shape']
+            if shape not in shape_groups:
+                shape_groups[shape] = {'count': 0, 'names': [], 'memory_mb': 0}
+            shape_groups[shape]['count'] += 1
+            shape_groups[shape]['names'].append(info['name'])
+            shape_groups[shape]['memory_mb'] += info['memory_mb']
+        
+        logger.info(f"\nUnique shapes: {len(shape_groups)}")
+        logger.info(f"Total parameters: {param_info[-1]['numel']:,}")
+        logger.info(f"Total memory: {param_info[-1]['memory_mb']:.2f} MB")
+        
+        # Top shapes by count
+        logger.info("\nTop 10 shapes by frequency:")
+        for shape, stats in sorted(shape_groups.items(), key=lambda x: -x[1]['count'])[:10]:
+            logger.info(f"  {str(shape):<30} count={stats['count']:<5} memory={stats['memory_mb']:.2f} MB")
     
     def get_batch(self):
         try:
@@ -293,6 +416,9 @@ def run_profiling(args: ProfilerArguments):
     
     # Apply torch.compile if requested
     if args.torch_compile:
+        # Increase dynamo cache size to avoid recompilation due to varying input shapes
+        torch._dynamo.config.cache_size_limit = 512
+        
         logger.info(f"Applying torch.compile with mode='{args.compile_mode}'...")
         model = torch.compile(model, mode=args.compile_mode)
         logger.info("Model compiled successfully")
@@ -317,6 +443,43 @@ def run_profiling(args: ProfilerArguments):
     
     # Create trainer
     trainer = MeZOTrainer(model, tokenizer, args, dataloader)
+    
+    # Save parameter shapes to file
+    param_shapes_path = os.path.join(output_subdir, f"{model_short_name}_parameter_shapes.txt")
+    trainer.save_parameter_shapes(param_shapes_path)
+    trainer.print_parameter_shapes_summary()
+    
+    # =========================================================================
+    # TORCH.COMPILE WARMUP - Complete compilation BEFORE profiling
+    # =========================================================================
+    # torch.compile uses lazy compilation - it compiles on first execution.
+    # We need to run warmup steps to trigger compilation before profiling,
+    # otherwise profiling will capture compilation overhead instead of
+    # steady-state optimized execution.
+    if args.torch_compile and args.compile_warmup_steps > 0:
+        logger.info(f"Running {args.compile_warmup_steps} compile warmup steps (outside profiler)...")
+        logger.info("This completes torch.compile graph compilation before profiling starts.")
+        
+        for warmup_step in range(args.compile_warmup_steps):
+            # Get batch
+            inputs = trainer.get_batch()
+            
+            # Run ZO step (triggers forward pass compilation)
+            loss, projected_grad, zo_random_seed = trainer.zo_step(inputs)
+            
+            # Run ZO update
+            trainer.zo_update(projected_grad, zo_random_seed)
+            
+            logger.info(f"  Compile warmup step {warmup_step + 1}/{args.compile_warmup_steps}, loss = {loss.item():.4f}")
+        
+        # Ensure all CUDA operations (including compilation) are complete
+        torch.cuda.synchronize()
+        
+        # Reset memory stats after warmup
+        if torch.cuda.is_available():
+            torch.cuda.reset_peak_memory_stats()
+        
+        logger.info("Compile warmup complete. All graphs compiled. Starting profiling...")
     
     # Define profiling schedule
     # wait=1: skip first step (warmup)
@@ -540,6 +703,8 @@ def main():
     parser.add_argument("--compile_mode", type=str, default="default",
                        choices=["default", "reduce-overhead", "max-autotune"],
                        help="torch.compile mode (default: default)")
+    parser.add_argument("--compile_warmup_steps", type=int, default=3,
+                       help="Number of warmup steps to complete torch.compile before profiling (default: 3)")
     parser.add_argument("--memory_timeline", action="store_true", default=False,
                        help="Record detailed CUDA memory allocation timeline")
     parser.add_argument("--export_memory_snapshot", action="store_true", default=False,
@@ -562,6 +727,7 @@ def main():
         with_stack=args_parsed.with_stack,
         torch_compile=args_parsed.torch_compile,
         compile_mode=args_parsed.compile_mode,
+        compile_warmup_steps=args_parsed.compile_warmup_steps,
         memory_timeline=args_parsed.memory_timeline,
         export_memory_snapshot=args_parsed.export_memory_snapshot
     )

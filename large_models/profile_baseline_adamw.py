@@ -23,6 +23,7 @@ from typing import Optional
 
 import numpy as np
 import torch
+import torch._dynamo
 from torch.nn import CrossEntropyLoss
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity, schedule, tensorboard_trace_handler
@@ -57,6 +58,7 @@ class BaselineProfilerArguments:
     with_stack: bool = False
     torch_compile: bool = False
     compile_mode: str = "default"
+    compile_warmup_steps: int = 3  # Warmup steps to complete torch.compile before profiling
     memory_timeline: bool = False
     export_memory_snapshot: bool = False
     
@@ -207,7 +209,7 @@ def profile_baseline_training(args: BaselineProfilerArguments):
     # 1. float32 weights (more memory, stable)
     # 2. float16 weights with AMP (less memory, needs scaler)
     # We use float32 to avoid gradient issues, matching practical FO training
-    torch_dtype = torch.float32  # Always use float32 for first-order training
+    torch_dtype = getattr(torch, 'float32')  # Always use float32 for first-order training
     
     config = AutoConfig.from_pretrained(args.model_name)
     model = AutoModelForCausalLM.from_pretrained(
@@ -221,6 +223,9 @@ def profile_baseline_training(args: BaselineProfilerArguments):
     
     # Apply torch.compile if requested
     if args.torch_compile:
+        # Increase dynamo cache size to avoid recompilation due to varying input shapes
+        torch._dynamo.config.cache_size_limit = 256
+        
         logger.info(f"Applying torch.compile with mode='{args.compile_mode}'...")
         model = torch.compile(model, mode=args.compile_mode)
         logger.info("Model compiled successfully")
@@ -253,6 +258,50 @@ def profile_baseline_training(args: BaselineProfilerArguments):
     
     # Get device
     device = next(model.parameters()).device
+    
+    # =========================================================================
+    # TORCH.COMPILE WARMUP - Complete compilation BEFORE profiling
+    # =========================================================================
+    # torch.compile uses lazy compilation - it compiles on first execution.
+    # We need to run warmup steps to trigger compilation before profiling,
+    # otherwise profiling will capture compilation overhead instead of
+    # steady-state optimized execution.
+    if args.torch_compile and args.compile_warmup_steps > 0:
+        logger.info(f"Running {args.compile_warmup_steps} compile warmup steps (outside profiler)...")
+        logger.info("This completes torch.compile graph compilation before profiling starts.")
+        
+        warmup_iter = iter(dataloader)
+        for warmup_step in range(args.compile_warmup_steps):
+            try:
+                batch = next(warmup_iter)
+            except StopIteration:
+                warmup_iter = iter(dataloader)
+                batch = next(warmup_iter)
+            
+            input_ids = batch['input_ids'].to(device)
+            labels = batch['labels'].to(device)
+            option_len = batch['option_len']
+            
+            # Forward pass (triggers compilation)
+            loss = compute_loss_with_option_len(model, input_ids, labels, option_len, pad_token_id)
+            
+            # Backward pass (triggers backward graph compilation)
+            loss.backward()
+            
+            # Optimizer step
+            optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
+            
+            logger.info(f"  Compile warmup step {warmup_step + 1}/{args.compile_warmup_steps}, loss = {loss.item():.4f}")
+        
+        # Ensure all CUDA operations (including compilation) are complete
+        torch.cuda.synchronize()
+        
+        # Reset memory stats after warmup
+        if torch.cuda.is_available():
+            torch.cuda.reset_peak_memory_stats()
+        
+        logger.info("Compile warmup complete. All graphs compiled. Starting profiling...")
     
     # Define profiling schedule
     profiler_schedule = schedule(
@@ -490,6 +539,8 @@ def main():
     parser.add_argument("--compile_mode", type=str, default="default",
                         choices=["default", "reduce-overhead", "max-autotune"],
                         help="torch.compile mode (default: default)")
+    parser.add_argument("--compile_warmup_steps", type=int, default=3,
+                        help="Number of warmup steps to complete torch.compile before profiling (default: 3)")
     parser.add_argument("--memory_timeline", action="store_true", default=False,
                         help="Record detailed CUDA memory allocation timeline")
     parser.add_argument("--export_memory_snapshot", action="store_true", default=False,
@@ -515,6 +566,7 @@ def main():
         with_stack=args_parsed.with_stack,
         torch_compile=args_parsed.torch_compile,
         compile_mode=args_parsed.compile_mode,
+        compile_warmup_steps=args_parsed.compile_warmup_steps,
         memory_timeline=args_parsed.memory_timeline,
         export_memory_snapshot=args_parsed.export_memory_snapshot
     )

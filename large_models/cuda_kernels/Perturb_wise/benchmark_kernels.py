@@ -26,12 +26,13 @@ import gc
 import argparse
 from typing import Dict, Tuple
 
-# Model size presets (parameter counts)
+# Model size presets (EXACT parameter counts from profiling)
+# These values match the actual OPT model parameter counts
 MODEL_SIZES = {
-    'opt-350m': 331_196_416,
-    'opt-2.7b': 2_700_000_000,
-    'opt-6.7b': 6_700_000_000,
-    'opt-13b': 13_000_000_000,
+    'opt-350m': 331_196_416,    # 388 params, hidden=1024, layers=24
+    'opt-2.7b': 2_651_596_800,  # ~514 params, hidden=2560, layers=32 (from profiled structure)
+    'opt-6.7b': 6_658_473_984,  # 516 params, hidden=4096, layers=32 (exact from profiling)
+    'opt-13b': 13_016_023_040,  # 644 params, hidden=5120, layers=40 (from profiled structure)
 }
 
 # Import Triton kernels
@@ -217,22 +218,21 @@ def benchmark_mezo_original_style(params_list: list, seed: int, alpha: float, n_
 def create_params_list_like_model(total_elements: int, dtype=torch.float32, device='cuda') -> list:
     """Create a list of parameter tensors that EXACTLY matches real OPT model structure.
     
-    This uses the actual OPT architecture specifications to create accurate parameter
-    distributions for benchmarking MeZO perturbation operations.
+    Based on actual profiled parameter shapes from OPT models:
+    - OPT-350M: 388 params, hidden=1024, layers=24, ffn=4096, embed_dim=512
+    - OPT-2.7B: ~450 params, hidden=2560, layers=32, ffn=10240
+    - OPT-6.7B: 516 params, hidden=4096, layers=32, ffn=16384
+    - OPT-13B:  644 params, hidden=5120, layers=40, ffn=20480
     
-    OPT Model Configurations (from HuggingFace):
-    - OPT-350M: hidden=1024, layers=24, ffn=4096,  vocab=50272 → 331M params, 388 tensors
-    - OPT-1.3B: hidden=2048, layers=24, ffn=8192,  vocab=50272 → 1.3B params
-    - OPT-2.7B: hidden=2560, layers=32, ffn=10240, vocab=50272 → 2.7B params
-    - OPT-6.7B: hidden=4096, layers=32, ffn=16384, vocab=50272 → 6.7B params
-    - OPT-13B:  hidden=5120, layers=40, ffn=20480, vocab=50272 → 13B params
+    Each transformer layer has 16 parameters:
+    - 4 attention projections (q,k,v,out) × (weight + bias) = 8 params
+    - 2 FFN layers (fc1, fc2) × (weight + bias) = 4 params
+    - 2 layer norms (self_attn, final) × (weight + bias) = 4 params
     
-    Real OPT-350M structure (from model.named_parameters()):
-    - Each transformer layer has 16 parameter tensors:
-      - 4 attention projections (Q,K,V,O) × (weight + bias) = 8 tensors
-      - 2 FFN layers (fc1, fc2) × (weight + bias) = 4 tensors  
-      - 2 layer norms × (weight + bias) = 4 tensors
-    - Plus embedding layers at the start
+    Plus embedding layers:
+    - embed_tokens, embed_positions
+    - project_in/project_out (OPT-350M only)
+    - decoder final_layer_norm
     
     Args:
         total_elements: Total number of elements across all tensors
@@ -242,13 +242,38 @@ def create_params_list_like_model(total_elements: int, dtype=torch.float32, devi
     Returns:
         List of parameter tensors matching real OPT architecture
     """
-    # Determine which OPT model config to use based on parameter count
+    # Real OPT configurations from profiled parameter shapes
     OPT_CONFIGS = {
-        331_196_416: {'hidden': 1024, 'layers': 24, 'ffn': 4096, 'vocab': 50272, 'name': 'OPT-350M'},
-        1_315_753_984: {'hidden': 2048, 'layers': 24, 'ffn': 8192, 'vocab': 50272, 'name': 'OPT-1.3B'},
-        2_700_000_000: {'hidden': 2560, 'layers': 32, 'ffn': 10240, 'vocab': 50272, 'name': 'OPT-2.7B'},
-        6_700_000_000: {'hidden': 4096, 'layers': 32, 'ffn': 16384, 'vocab': 50272, 'name': 'OPT-6.7B'},
-        13_000_000_000: {'hidden': 5120, 'layers': 40, 'ffn': 20480, 'vocab': 50272, 'name': 'OPT-13B'},
+        331_196_416: {
+            'hidden': 1024, 'layers': 24, 'ffn': 4096, 'vocab': 50272,
+            'embed_dim': 512, 'max_pos': 2050, 'has_project': True,
+            'name': 'OPT-350M', 'expected_params': 388
+        },
+        1_315_753_984: {
+            'hidden': 2048, 'layers': 24, 'ffn': 8192, 'vocab': 50272,
+            'embed_dim': 2048, 'max_pos': 2050, 'has_project': False,
+            'name': 'OPT-1.3B', 'expected_params': 386
+        },
+        2_700_000_000: {
+            'hidden': 2560, 'layers': 32, 'ffn': 10240, 'vocab': 50272,
+            'embed_dim': 2560, 'max_pos': 2050, 'has_project': False,
+            'name': 'OPT-2.7B', 'expected_params': 514
+        },
+        6_658_473_984: {  # Exact value from profiling
+            'hidden': 4096, 'layers': 32, 'ffn': 16384, 'vocab': 50272,
+            'embed_dim': 4096, 'max_pos': 2050, 'has_project': False,
+            'name': 'OPT-6.7B', 'expected_params': 516
+        },
+        6_700_000_000: {  # Approximate alias
+            'hidden': 4096, 'layers': 32, 'ffn': 16384, 'vocab': 50272,
+            'embed_dim': 4096, 'max_pos': 2050, 'has_project': False,
+            'name': 'OPT-6.7B', 'expected_params': 516
+        },
+        13_000_000_000: {
+            'hidden': 5120, 'layers': 40, 'ffn': 20480, 'vocab': 50272,
+            'embed_dim': 5120, 'max_pos': 2050, 'has_project': False,
+            'name': 'OPT-13B', 'expected_params': 644
+        },
     }
     
     # Find closest config
@@ -259,73 +284,53 @@ def create_params_list_like_model(total_elements: int, dtype=torch.float32, devi
     n_layers = config['layers']
     ffn_dim = config['ffn']
     vocab_size = config['vocab']
+    embed_dim = config['embed_dim']
+    max_pos = config['max_pos']
+    has_project = config['has_project']
     
     params_list = []
     
     # === Embedding layers ===
-    # embed_tokens: [vocab_size, embed_dim] - OPT uses word_embed_proj_dim
-    embed_dim = hidden // 2 if hidden >= 1024 else hidden
-    params_list.append(torch.randn(vocab_size * embed_dim, dtype=dtype, device=device))  # embed_tokens
+    # embed_tokens: [vocab_size, embed_dim]
+    params_list.append(torch.randn(vocab_size, embed_dim, dtype=dtype, device=device))
     
     # embed_positions: [max_position, hidden]
-    max_positions = 2050  # OPT default
-    params_list.append(torch.randn(max_positions * hidden, dtype=dtype, device=device))  # embed_positions
+    params_list.append(torch.randn(max_pos, hidden, dtype=dtype, device=device))
     
-    # project_in/project_out if embed_dim != hidden
-    if embed_dim != hidden:
-        params_list.append(torch.randn(embed_dim * hidden, dtype=dtype, device=device))  # project_in
-        params_list.append(torch.randn(hidden * embed_dim, dtype=dtype, device=device))  # project_out
+    # Decoder final_layer_norm (at decoder level, before layers)
+    params_list.append(torch.randn(hidden, dtype=dtype, device=device))  # weight
+    params_list.append(torch.randn(hidden, dtype=dtype, device=device))  # bias
     
-    # === Transformer layers ===
+    # project_in/project_out for OPT-350M (embed_dim != hidden)
+    if has_project:
+        params_list.append(torch.randn(hidden, embed_dim, dtype=dtype, device=device))  # project_in
+        params_list.append(torch.randn(embed_dim, hidden, dtype=dtype, device=device))  # project_out
+    
+    # === Transformer layers (16 params per layer) ===
     for layer_idx in range(n_layers):
-        # Self-attention: Q, K, V, O projections (weight + bias each)
-        params_list.append(torch.randn(hidden * hidden, dtype=dtype, device=device))  # q_proj.weight
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # q_proj.bias
-        params_list.append(torch.randn(hidden * hidden, dtype=dtype, device=device))  # k_proj.weight
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # k_proj.bias
-        params_list.append(torch.randn(hidden * hidden, dtype=dtype, device=device))  # v_proj.weight
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # v_proj.bias
-        params_list.append(torch.randn(hidden * hidden, dtype=dtype, device=device))  # out_proj.weight
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # out_proj.bias
+        # Self-attention: k, v, q, out projections (weight + bias each)
+        for proj in ['k', 'v', 'q', 'out']:
+            params_list.append(torch.randn(hidden, hidden, dtype=dtype, device=device))  # weight
+            params_list.append(torch.randn(hidden, dtype=dtype, device=device))          # bias
         
-        # Self-attention layer norm
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # self_attn_layer_norm.weight
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # self_attn_layer_norm.bias
+        # self_attn_layer_norm (weight + bias)
+        params_list.append(torch.randn(hidden, dtype=dtype, device=device))
+        params_list.append(torch.randn(hidden, dtype=dtype, device=device))
         
-        # FFN: fc1 (up), fc2 (down)
-        params_list.append(torch.randn(ffn_dim * hidden, dtype=dtype, device=device)) # fc1.weight
+        # FFN: fc1 (up-projection), fc2 (down-projection)
+        params_list.append(torch.randn(ffn_dim, hidden, dtype=dtype, device=device))  # fc1.weight
         params_list.append(torch.randn(ffn_dim, dtype=dtype, device=device))          # fc1.bias
-        params_list.append(torch.randn(hidden * ffn_dim, dtype=dtype, device=device)) # fc2.weight
+        params_list.append(torch.randn(hidden, ffn_dim, dtype=dtype, device=device))  # fc2.weight
         params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # fc2.bias
         
-        # Final layer norm
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # final_layer_norm.weight
-        params_list.append(torch.randn(hidden, dtype=dtype, device=device))           # final_layer_norm.bias
+        # final_layer_norm (per-layer, weight + bias)
+        params_list.append(torch.randn(hidden, dtype=dtype, device=device))
+        params_list.append(torch.randn(hidden, dtype=dtype, device=device))
     
-    # Calculate actual total and scale if needed
+    # Verify structure
     actual_total = sum(p.numel() for p in params_list)
-    
-    # If there's a significant difference, scale the largest layers proportionally
-    if abs(actual_total - total_elements) > total_elements * 0.01:  # More than 1% difference
-        # Scale factor to match target
-        scale = total_elements / actual_total
-        
-        # Rebuild with scaled sizes (only scale large tensors, keep biases same)
-        params_scaled = []
-        for p in params_list:
-            if p.numel() > 10000:  # Only scale large tensors (weights, not biases)
-                new_size = int(p.numel() * scale)
-                params_scaled.append(torch.randn(new_size, dtype=dtype, device=device))
-            else:
-                params_scaled.append(p)
-        
-        # Handle any remaining difference
-        final_total = sum(p.numel() for p in params_scaled)
-        diff = total_elements - final_total
-        if diff > 0:
-            params_scaled.append(torch.randn(diff, dtype=dtype, device=device))
-        
-        return params_scaled
+    print(f"  {config['name']}: Created {len(params_list)} params (expected {config['expected_params']}), "
+          f"{actual_total:,} elements (target {total_elements:,})")
     
     return params_list
 

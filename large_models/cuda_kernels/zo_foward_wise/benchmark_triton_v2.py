@@ -44,29 +44,103 @@ except ImportError:
 
 
 def create_model_params(model_name: str, device: torch.device) -> Tuple[list, int]:
-    """Create parameter groups matching model architecture."""
+    """Create parameter groups matching REAL OPT model architecture.
+    
+    Based on actual OPT parameter shapes from profiling:
+    - OPT-350m: 388 params, 331M elements (24 layers, hidden=1024, ffn=4096)
+    - OPT-2.7b: ~450 params, 2.5B elements (32 layers, hidden=2560, ffn=10240)
+    - OPT-6.7b: 516 params, 6.66B elements (32 layers, hidden=4096, ffn=16384)
+    
+    Each layer has 16 parameters:
+    - 4 attention weight matrices (q, k, v, out) + 4 biases
+    - 2 FFN weight matrices (fc1, fc2) + 2 biases  
+    - 2 layer norms (self_attn_layer_norm, final_layer_norm) with weight + bias each
+    
+    Plus embeddings:
+    - embed_tokens, embed_positions
+    - project_in, project_out (for OPT-350m where embed_dim != hidden)
+    - final_layer_norm (decoder level)
+    """
+    # Real OPT configurations from HuggingFace
     configs = {
-        'opt-350m': {'layers': 24, 'hidden': 1024, 'ffn': 4096},
-        'opt-1.3b': {'layers': 24, 'hidden': 2048, 'ffn': 8192},
-        'opt-2.7b': {'layers': 32, 'hidden': 2560, 'ffn': 10240},
-        'opt-6.7b': {'layers': 32, 'hidden': 4096, 'ffn': 16384},
+        'opt-350m': {
+            'layers': 24, 'hidden': 1024, 'ffn': 4096, 
+            'embed_dim': 512,  # OPT-350m uses word_embed_proj_dim=512
+            'vocab': 50272, 'max_pos': 2050,
+            'has_project': True,  # Has project_in/project_out
+        },
+        'opt-1.3b': {
+            'layers': 24, 'hidden': 2048, 'ffn': 8192,
+            'embed_dim': 2048,  # No projection needed
+            'vocab': 50272, 'max_pos': 2050,
+            'has_project': False,
+        },
+        'opt-2.7b': {
+            'layers': 32, 'hidden': 2560, 'ffn': 10240,
+            'embed_dim': 2560,
+            'vocab': 50272, 'max_pos': 2050,
+            'has_project': False,
+        },
+        'opt-6.7b': {
+            'layers': 32, 'hidden': 4096, 'ffn': 16384,
+            'embed_dim': 4096,
+            'vocab': 50272, 'max_pos': 2050,
+            'has_project': False,
+        },
     }
     
     config = configs.get(model_name, configs['opt-350m'])
     layers = config['layers']
     hidden = config['hidden']
     ffn = config['ffn']
+    embed_dim = config['embed_dim']
+    vocab = config['vocab']
+    max_pos = config['max_pos']
+    has_project = config['has_project']
     
     param_groups = []
-    for _ in range(layers):
-        # Attention: q, k, v, o projections
-        for _ in range(4):
-            param_groups.append(torch.randn(hidden * hidden, device=device, dtype=torch.float32))
-        # FFN: fc1, fc2
-        for _ in range(2):
-            param_groups.append(torch.randn(hidden * ffn, device=device, dtype=torch.float32))
     
-    return param_groups, sum(p.numel() for p in param_groups)
+    # === Embedding layers ===
+    # embed_tokens: [vocab, embed_dim]
+    param_groups.append(torch.randn(vocab * embed_dim, device=device, dtype=torch.float32))
+    # embed_positions: [max_pos, hidden]
+    param_groups.append(torch.randn(max_pos * hidden, device=device, dtype=torch.float32))
+    
+    # project_in/project_out for OPT-350m
+    if has_project:
+        param_groups.append(torch.randn(hidden * embed_dim, device=device, dtype=torch.float32))  # project_in
+        param_groups.append(torch.randn(embed_dim * hidden, device=device, dtype=torch.float32))  # project_out
+    
+    # Decoder final_layer_norm (weight + bias)
+    param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))  # final_layer_norm.weight
+    param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))  # final_layer_norm.bias
+    
+    # === Transformer layers (16 params per layer) ===
+    for _ in range(layers):
+        # Self-attention: k, v, q, out projections (weight + bias each)
+        for _ in range(4):  # k, v, q, out
+            param_groups.append(torch.randn(hidden * hidden, device=device, dtype=torch.float32))  # weight
+            param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))           # bias
+        
+        # self_attn_layer_norm (weight + bias)
+        param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))
+        param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))
+        
+        # FFN: fc1, fc2 (weight + bias each)
+        param_groups.append(torch.randn(ffn * hidden, device=device, dtype=torch.float32))  # fc1.weight
+        param_groups.append(torch.randn(ffn, device=device, dtype=torch.float32))           # fc1.bias
+        param_groups.append(torch.randn(hidden * ffn, device=device, dtype=torch.float32))  # fc2.weight
+        param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))        # fc2.bias
+        
+        # final_layer_norm (weight + bias)
+        param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))
+        param_groups.append(torch.randn(hidden, device=device, dtype=torch.float32))
+    
+    total_elements = sum(p.numel() for p in param_groups)
+    print(f"Created {len(param_groups)} parameter groups with {total_elements:,} total elements")
+    
+    return param_groups, total_elements
+
 
 
 def benchmark_pytorch_per_group(

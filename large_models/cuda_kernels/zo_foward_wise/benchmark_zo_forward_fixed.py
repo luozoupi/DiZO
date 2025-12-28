@@ -23,13 +23,28 @@ import sys
 from typing import Dict, Tuple, List
 from dataclasses import dataclass
 
-# Model configurations
+# Model configurations (EXACT values from profiled OPT parameter shapes)
 MODEL_CONFIGS = {
-    'opt-350m': {'num_layers': 24, 'hidden_size': 1024, 'ffn_size': 4096},
-    'opt-1.3b': {'num_layers': 24, 'hidden_size': 2048, 'ffn_size': 8192},
-    'opt-2.7b': {'num_layers': 32, 'hidden_size': 2560, 'ffn_size': 10240},
-    'opt-6.7b': {'num_layers': 32, 'hidden_size': 4096, 'ffn_size': 16384},
-    'opt-13b': {'num_layers': 40, 'hidden_size': 5120, 'ffn_size': 20480},
+    'opt-350m': {
+        'num_layers': 24, 'hidden_size': 1024, 'ffn_size': 4096,
+        'embed_dim': 512, 'has_project': True, 'num_tensors': 388,
+    },
+    'opt-1.3b': {
+        'num_layers': 24, 'hidden_size': 2048, 'ffn_size': 8192,
+        'embed_dim': 2048, 'has_project': False, 'num_tensors': 386,
+    },
+    'opt-2.7b': {
+        'num_layers': 32, 'hidden_size': 2560, 'ffn_size': 10240,
+        'embed_dim': 2560, 'has_project': False, 'num_tensors': 514,
+    },
+    'opt-6.7b': {
+        'num_layers': 32, 'hidden_size': 4096, 'ffn_size': 16384,
+        'embed_dim': 4096, 'has_project': False, 'num_tensors': 516,
+    },
+    'opt-13b': {
+        'num_layers': 40, 'hidden_size': 5120, 'ffn_size': 20480,
+        'embed_dim': 5120, 'has_project': False, 'num_tensors': 644,
+    },
 }
 
 
@@ -49,26 +64,63 @@ def cleanup_gpu():
 
 
 def create_test_data(config: Dict, device: torch.device):
-    """Create test data matching DiZO's structure."""
+    """Create test data matching REAL OPT model structure.
+    
+    Based on profiled parameter shapes:
+    - Embedding layers (embed_tokens, embed_positions, project_in/out)
+    - Each transformer layer has 16 params
+    - Decoder final_layer_norm
+    """
     param_groups = []
     anchor_groups = []
     
     num_layers = config['num_layers']
     hidden = config['hidden_size']
     ffn = config['ffn_size']
+    embed_dim = config.get('embed_dim', hidden)
+    has_project = config.get('has_project', embed_dim != hidden)
+    vocab_size = 50272  # OPT vocab size
+    max_pos = 2050      # OPT max positions
     
+    def add_param(size):
+        param_groups.append(torch.randn(size, device=device, dtype=torch.float32))
+        anchor_groups.append(torch.randn(size, device=device, dtype=torch.float32))
+    
+    # === Embedding layers ===
+    add_param(vocab_size * embed_dim)  # embed_tokens
+    add_param(max_pos * hidden)        # embed_positions
+    
+    # Decoder final_layer_norm
+    add_param(hidden)  # weight
+    add_param(hidden)  # bias
+    
+    # project_in/project_out (OPT-350m only)
+    if has_project:
+        add_param(hidden * embed_dim)  # project_in
+        add_param(embed_dim * hidden)  # project_out
+    
+    # === Transformer layers (16 params per layer) ===
     for layer in range(num_layers):
-        # Attention: q, k, v, o projections
-        for _ in range(4):
-            size = hidden * hidden
-            param_groups.append(torch.randn(size, device=device, dtype=torch.float32))
-            anchor_groups.append(torch.randn(size, device=device, dtype=torch.float32))
+        # Self-attention projections (k, v, q, out) - each has weight + bias
+        for proj in ['k', 'v', 'q', 'out']:
+            add_param(hidden * hidden)  # weight
+            add_param(hidden)           # bias
         
-        # FFN: fc1 (hidden->ffn) and fc2 (ffn->hidden)
-        for _ in range(2):
-            size = hidden * ffn
-            param_groups.append(torch.randn(size, device=device, dtype=torch.float32))
-            anchor_groups.append(torch.randn(size, device=device, dtype=torch.float32))
+        # self_attn_layer_norm
+        add_param(hidden)  # weight
+        add_param(hidden)  # bias
+        
+        # FFN layers
+        add_param(ffn * hidden)  # fc1.weight
+        add_param(ffn)           # fc1.bias
+        add_param(hidden * ffn)  # fc2.weight
+        add_param(hidden)        # fc2.bias
+        
+        # final_layer_norm (per layer)
+        add_param(hidden)  # weight
+        add_param(hidden)  # bias
+    
+    print(f"Created {len(param_groups)} parameter groups with {sum(p.numel() for p in param_groups):,} total elements")
     
     return param_groups, anchor_groups
 
