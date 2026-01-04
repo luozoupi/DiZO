@@ -2,9 +2,9 @@ ninja_required_version = 1.3
 cxx = c++
 nvcc = /usr/local/cuda-12.4/bin/nvcc
 
-cflags = -pthread -B /home/luo00466/luo00466_data1/conda/py310/compiler_compat -Wno-unused-result -Wsign-compare -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /home/luo00466/luo00466_data1/conda/py310/include -fPIC -O2 -isystem /home/luo00466/luo00466_data1/conda/py310/include -fPIC -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include/TH -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include/THC -I/usr/local/cuda-12.4/include -I/home/luo00466/luo00466_data1/conda/py310/include/python3.10 -c
+cflags = -pthread -B /home/luo00466/luo00466_data1/conda/py310/compiler_compat -Wno-unused-result -Wsign-compare -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /home/luo00466/luo00466_data1/conda/py310/include -fPIC -O2 -isystem /home/luo00466/luo00466_data1/conda/py310/include -fPIC -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include/TH -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include/THC -I/usr/local/cuda-12.4/include -I/home/luo00466/luo00466_data1/conda/py310/include/python3.10 -c
 post_cflags = -O3 -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1011"' -DTORCH_EXTENSION_NAME=fused_perturb_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++17
-cuda_cflags = -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include/TH -I/mnt/data1/luo00466/conda/py310/lib/python3.10/site-packages/torch/include/THC -I/usr/local/cuda-12.4/include -I/home/luo00466/luo00466_data1/conda/py310/include/python3.10 -c
+cuda_cflags = -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include/TH -I/home/luo00466/luo00466_data1/conda/py310/lib/python3.10/site-packages/torch/include/THC -I/usr/local/cuda-12.4/include -I/home/luo00466/luo00466_data1/conda/py310/include/python3.10 -c
 cuda_post_cflags = -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -arch=sm_80 -DUSE_TORCH --use_fast_math -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1011"' -DTORCH_EXTENSION_NAME=fused_perturb_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++17
 cuda_dlink_post_cflags = 
 ldflags = 
@@ -23,7 +23,7 @@ rule cuda_compile
 
 
 
-build /mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/build/temp.linux-x86_64-cpython-310/fused_perturb.o: cuda_compile /mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/fused_perturb.cu
+build /mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/Perturb_wise/build/temp.linux-x86_64-cpython-310/fused_perturb.o: cuda_compile /mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/Perturb_wise/fused_perturb.cu
 
 
 

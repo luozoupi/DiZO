@@ -1,0 +1,680 @@
+========================================================================================================================
+PARAMETER SHAPES FOR ZO PERTURBATION AND UPDATE
+========================================================================================================================
+
+Model: facebook/opt-13b
+Total trainable parameters: 644
+
+No.    Parameter Name                                               Shape                            Elements  Memory (MB) Dtype          
+------------------------------------------------------------------------------------------------------------------------
+1      model.decoder.embed_tokens.weight                            (50272, 5120)                 257,392,640     490.9375 torch.float16  
+2      model.decoder.embed_positions.weight                         (2050, 5120)                   10,496,000      20.0195 torch.float16  
+3      model.decoder.final_layer_norm.weight                        (5120,)                             5,120       0.0098 torch.float16  
+4      model.decoder.final_layer_norm.bias                          (5120,)                             5,120       0.0098 torch.float16  
+5      model.decoder.layers.0.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+6      model.decoder.layers.0.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+7      model.decoder.layers.0.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+8      model.decoder.layers.0.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+9      model.decoder.layers.0.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+10     model.decoder.layers.0.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+11     model.decoder.layers.0.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+12     model.decoder.layers.0.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+13     model.decoder.layers.0.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+14     model.decoder.layers.0.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+15     model.decoder.layers.0.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+16     model.decoder.layers.0.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+17     model.decoder.layers.0.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+18     model.decoder.layers.0.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+19     model.decoder.layers.0.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+20     model.decoder.layers.0.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+21     model.decoder.layers.1.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+22     model.decoder.layers.1.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+23     model.decoder.layers.1.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+24     model.decoder.layers.1.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+25     model.decoder.layers.1.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+26     model.decoder.layers.1.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+27     model.decoder.layers.1.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+28     model.decoder.layers.1.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+29     model.decoder.layers.1.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+30     model.decoder.layers.1.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+31     model.decoder.layers.1.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+32     model.decoder.layers.1.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+33     model.decoder.layers.1.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+34     model.decoder.layers.1.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+35     model.decoder.layers.1.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+36     model.decoder.layers.1.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+37     model.decoder.layers.2.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+38     model.decoder.layers.2.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+39     model.decoder.layers.2.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+40     model.decoder.layers.2.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+41     model.decoder.layers.2.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+42     model.decoder.layers.2.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+43     model.decoder.layers.2.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+44     model.decoder.layers.2.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+45     model.decoder.layers.2.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+46     model.decoder.layers.2.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+47     model.decoder.layers.2.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+48     model.decoder.layers.2.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+49     model.decoder.layers.2.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+50     model.decoder.layers.2.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+51     model.decoder.layers.2.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+52     model.decoder.layers.2.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+53     model.decoder.layers.3.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+54     model.decoder.layers.3.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+55     model.decoder.layers.3.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+56     model.decoder.layers.3.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+57     model.decoder.layers.3.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+58     model.decoder.layers.3.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+59     model.decoder.layers.3.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+60     model.decoder.layers.3.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+61     model.decoder.layers.3.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+62     model.decoder.layers.3.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+63     model.decoder.layers.3.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+64     model.decoder.layers.3.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+65     model.decoder.layers.3.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+66     model.decoder.layers.3.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+67     model.decoder.layers.3.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+68     model.decoder.layers.3.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+69     model.decoder.layers.4.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+70     model.decoder.layers.4.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+71     model.decoder.layers.4.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+72     model.decoder.layers.4.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+73     model.decoder.layers.4.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+74     model.decoder.layers.4.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+75     model.decoder.layers.4.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+76     model.decoder.layers.4.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+77     model.decoder.layers.4.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+78     model.decoder.layers.4.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+79     model.decoder.layers.4.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+80     model.decoder.layers.4.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+81     model.decoder.layers.4.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+82     model.decoder.layers.4.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+83     model.decoder.layers.4.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+84     model.decoder.layers.4.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+85     model.decoder.layers.5.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+86     model.decoder.layers.5.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+87     model.decoder.layers.5.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+88     model.decoder.layers.5.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+89     model.decoder.layers.5.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+90     model.decoder.layers.5.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+91     model.decoder.layers.5.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+92     model.decoder.layers.5.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+93     model.decoder.layers.5.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+94     model.decoder.layers.5.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+95     model.decoder.layers.5.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+96     model.decoder.layers.5.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+97     model.decoder.layers.5.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+98     model.decoder.layers.5.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+99     model.decoder.layers.5.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+100    model.decoder.layers.5.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+101    model.decoder.layers.6.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+102    model.decoder.layers.6.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+103    model.decoder.layers.6.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+104    model.decoder.layers.6.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+105    model.decoder.layers.6.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+106    model.decoder.layers.6.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+107    model.decoder.layers.6.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+108    model.decoder.layers.6.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+109    model.decoder.layers.6.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+110    model.decoder.layers.6.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+111    model.decoder.layers.6.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+112    model.decoder.layers.6.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+113    model.decoder.layers.6.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+114    model.decoder.layers.6.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+115    model.decoder.layers.6.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+116    model.decoder.layers.6.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+117    model.decoder.layers.7.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+118    model.decoder.layers.7.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+119    model.decoder.layers.7.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+120    model.decoder.layers.7.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+121    model.decoder.layers.7.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+122    model.decoder.layers.7.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+123    model.decoder.layers.7.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+124    model.decoder.layers.7.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+125    model.decoder.layers.7.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+126    model.decoder.layers.7.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+127    model.decoder.layers.7.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+128    model.decoder.layers.7.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+129    model.decoder.layers.7.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+130    model.decoder.layers.7.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+131    model.decoder.layers.7.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+132    model.decoder.layers.7.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+133    model.decoder.layers.8.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+134    model.decoder.layers.8.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+135    model.decoder.layers.8.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+136    model.decoder.layers.8.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+137    model.decoder.layers.8.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+138    model.decoder.layers.8.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+139    model.decoder.layers.8.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+140    model.decoder.layers.8.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+141    model.decoder.layers.8.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+142    model.decoder.layers.8.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+143    model.decoder.layers.8.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+144    model.decoder.layers.8.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+145    model.decoder.layers.8.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+146    model.decoder.layers.8.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+147    model.decoder.layers.8.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+148    model.decoder.layers.8.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+149    model.decoder.layers.9.self_attn.k_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+150    model.decoder.layers.9.self_attn.k_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+151    model.decoder.layers.9.self_attn.v_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+152    model.decoder.layers.9.self_attn.v_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+153    model.decoder.layers.9.self_attn.q_proj.weight               (5120, 5120)                   26,214,400      50.0000 torch.float16  
+154    model.decoder.layers.9.self_attn.q_proj.bias                 (5120,)                             5,120       0.0098 torch.float16  
+155    model.decoder.layers.9.self_attn.out_proj.weight             (5120, 5120)                   26,214,400      50.0000 torch.float16  
+156    model.decoder.layers.9.self_attn.out_proj.bias               (5120,)                             5,120       0.0098 torch.float16  
+157    model.decoder.layers.9.self_attn_layer_norm.weight           (5120,)                             5,120       0.0098 torch.float16  
+158    model.decoder.layers.9.self_attn_layer_norm.bias             (5120,)                             5,120       0.0098 torch.float16  
+159    model.decoder.layers.9.fc1.weight                            (20480, 5120)                 104,857,600     200.0000 torch.float16  
+160    model.decoder.layers.9.fc1.bias                              (20480,)                           20,480       0.0391 torch.float16  
+161    model.decoder.layers.9.fc2.weight                            (5120, 20480)                 104,857,600     200.0000 torch.float16  
+162    model.decoder.layers.9.fc2.bias                              (5120,)                             5,120       0.0098 torch.float16  
+163    model.decoder.layers.9.final_layer_norm.weight               (5120,)                             5,120       0.0098 torch.float16  
+164    model.decoder.layers.9.final_layer_norm.bias                 (5120,)                             5,120       0.0098 torch.float16  
+165    model.decoder.layers.10.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+166    model.decoder.layers.10.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+167    model.decoder.layers.10.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+168    model.decoder.layers.10.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+169    model.decoder.layers.10.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+170    model.decoder.layers.10.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+171    model.decoder.layers.10.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+172    model.decoder.layers.10.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+173    model.decoder.layers.10.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+174    model.decoder.layers.10.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+175    model.decoder.layers.10.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+176    model.decoder.layers.10.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+177    model.decoder.layers.10.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+178    model.decoder.layers.10.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+179    model.decoder.layers.10.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+180    model.decoder.layers.10.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+181    model.decoder.layers.11.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+182    model.decoder.layers.11.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+183    model.decoder.layers.11.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+184    model.decoder.layers.11.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+185    model.decoder.layers.11.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+186    model.decoder.layers.11.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+187    model.decoder.layers.11.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+188    model.decoder.layers.11.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+189    model.decoder.layers.11.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+190    model.decoder.layers.11.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+191    model.decoder.layers.11.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+192    model.decoder.layers.11.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+193    model.decoder.layers.11.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+194    model.decoder.layers.11.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+195    model.decoder.layers.11.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+196    model.decoder.layers.11.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+197    model.decoder.layers.12.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+198    model.decoder.layers.12.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+199    model.decoder.layers.12.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+200    model.decoder.layers.12.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+201    model.decoder.layers.12.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+202    model.decoder.layers.12.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+203    model.decoder.layers.12.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+204    model.decoder.layers.12.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+205    model.decoder.layers.12.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+206    model.decoder.layers.12.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+207    model.decoder.layers.12.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+208    model.decoder.layers.12.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+209    model.decoder.layers.12.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+210    model.decoder.layers.12.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+211    model.decoder.layers.12.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+212    model.decoder.layers.12.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+213    model.decoder.layers.13.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+214    model.decoder.layers.13.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+215    model.decoder.layers.13.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+216    model.decoder.layers.13.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+217    model.decoder.layers.13.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+218    model.decoder.layers.13.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+219    model.decoder.layers.13.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+220    model.decoder.layers.13.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+221    model.decoder.layers.13.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+222    model.decoder.layers.13.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+223    model.decoder.layers.13.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+224    model.decoder.layers.13.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+225    model.decoder.layers.13.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+226    model.decoder.layers.13.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+227    model.decoder.layers.13.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+228    model.decoder.layers.13.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+229    model.decoder.layers.14.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+230    model.decoder.layers.14.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+231    model.decoder.layers.14.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+232    model.decoder.layers.14.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+233    model.decoder.layers.14.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+234    model.decoder.layers.14.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+235    model.decoder.layers.14.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+236    model.decoder.layers.14.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+237    model.decoder.layers.14.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+238    model.decoder.layers.14.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+239    model.decoder.layers.14.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+240    model.decoder.layers.14.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+241    model.decoder.layers.14.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+242    model.decoder.layers.14.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+243    model.decoder.layers.14.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+244    model.decoder.layers.14.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+245    model.decoder.layers.15.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+246    model.decoder.layers.15.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+247    model.decoder.layers.15.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+248    model.decoder.layers.15.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+249    model.decoder.layers.15.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+250    model.decoder.layers.15.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+251    model.decoder.layers.15.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+252    model.decoder.layers.15.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+253    model.decoder.layers.15.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+254    model.decoder.layers.15.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+255    model.decoder.layers.15.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+256    model.decoder.layers.15.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+257    model.decoder.layers.15.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+258    model.decoder.layers.15.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+259    model.decoder.layers.15.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+260    model.decoder.layers.15.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+261    model.decoder.layers.16.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+262    model.decoder.layers.16.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+263    model.decoder.layers.16.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+264    model.decoder.layers.16.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+265    model.decoder.layers.16.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+266    model.decoder.layers.16.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+267    model.decoder.layers.16.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+268    model.decoder.layers.16.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+269    model.decoder.layers.16.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+270    model.decoder.layers.16.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+271    model.decoder.layers.16.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+272    model.decoder.layers.16.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+273    model.decoder.layers.16.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+274    model.decoder.layers.16.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+275    model.decoder.layers.16.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+276    model.decoder.layers.16.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+277    model.decoder.layers.17.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+278    model.decoder.layers.17.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+279    model.decoder.layers.17.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+280    model.decoder.layers.17.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+281    model.decoder.layers.17.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+282    model.decoder.layers.17.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+283    model.decoder.layers.17.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+284    model.decoder.layers.17.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+285    model.decoder.layers.17.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+286    model.decoder.layers.17.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+287    model.decoder.layers.17.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+288    model.decoder.layers.17.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+289    model.decoder.layers.17.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+290    model.decoder.layers.17.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+291    model.decoder.layers.17.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+292    model.decoder.layers.17.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+293    model.decoder.layers.18.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+294    model.decoder.layers.18.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+295    model.decoder.layers.18.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+296    model.decoder.layers.18.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+297    model.decoder.layers.18.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+298    model.decoder.layers.18.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+299    model.decoder.layers.18.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+300    model.decoder.layers.18.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+301    model.decoder.layers.18.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+302    model.decoder.layers.18.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+303    model.decoder.layers.18.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+304    model.decoder.layers.18.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+305    model.decoder.layers.18.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+306    model.decoder.layers.18.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+307    model.decoder.layers.18.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+308    model.decoder.layers.18.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+309    model.decoder.layers.19.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+310    model.decoder.layers.19.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+311    model.decoder.layers.19.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+312    model.decoder.layers.19.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+313    model.decoder.layers.19.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+314    model.decoder.layers.19.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+315    model.decoder.layers.19.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+316    model.decoder.layers.19.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+317    model.decoder.layers.19.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+318    model.decoder.layers.19.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+319    model.decoder.layers.19.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+320    model.decoder.layers.19.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+321    model.decoder.layers.19.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+322    model.decoder.layers.19.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+323    model.decoder.layers.19.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+324    model.decoder.layers.19.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+325    model.decoder.layers.20.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+326    model.decoder.layers.20.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+327    model.decoder.layers.20.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+328    model.decoder.layers.20.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+329    model.decoder.layers.20.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+330    model.decoder.layers.20.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+331    model.decoder.layers.20.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+332    model.decoder.layers.20.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+333    model.decoder.layers.20.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+334    model.decoder.layers.20.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+335    model.decoder.layers.20.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+336    model.decoder.layers.20.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+337    model.decoder.layers.20.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+338    model.decoder.layers.20.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+339    model.decoder.layers.20.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+340    model.decoder.layers.20.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+341    model.decoder.layers.21.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+342    model.decoder.layers.21.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+343    model.decoder.layers.21.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+344    model.decoder.layers.21.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+345    model.decoder.layers.21.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+346    model.decoder.layers.21.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+347    model.decoder.layers.21.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+348    model.decoder.layers.21.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+349    model.decoder.layers.21.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+350    model.decoder.layers.21.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+351    model.decoder.layers.21.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+352    model.decoder.layers.21.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+353    model.decoder.layers.21.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+354    model.decoder.layers.21.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+355    model.decoder.layers.21.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+356    model.decoder.layers.21.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+357    model.decoder.layers.22.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+358    model.decoder.layers.22.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+359    model.decoder.layers.22.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+360    model.decoder.layers.22.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+361    model.decoder.layers.22.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+362    model.decoder.layers.22.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+363    model.decoder.layers.22.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+364    model.decoder.layers.22.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+365    model.decoder.layers.22.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+366    model.decoder.layers.22.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+367    model.decoder.layers.22.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+368    model.decoder.layers.22.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+369    model.decoder.layers.22.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+370    model.decoder.layers.22.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+371    model.decoder.layers.22.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+372    model.decoder.layers.22.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+373    model.decoder.layers.23.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+374    model.decoder.layers.23.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+375    model.decoder.layers.23.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+376    model.decoder.layers.23.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+377    model.decoder.layers.23.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+378    model.decoder.layers.23.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+379    model.decoder.layers.23.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+380    model.decoder.layers.23.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+381    model.decoder.layers.23.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+382    model.decoder.layers.23.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+383    model.decoder.layers.23.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+384    model.decoder.layers.23.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+385    model.decoder.layers.23.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+386    model.decoder.layers.23.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+387    model.decoder.layers.23.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+388    model.decoder.layers.23.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+389    model.decoder.layers.24.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+390    model.decoder.layers.24.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+391    model.decoder.layers.24.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+392    model.decoder.layers.24.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+393    model.decoder.layers.24.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+394    model.decoder.layers.24.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+395    model.decoder.layers.24.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+396    model.decoder.layers.24.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+397    model.decoder.layers.24.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+398    model.decoder.layers.24.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+399    model.decoder.layers.24.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+400    model.decoder.layers.24.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+401    model.decoder.layers.24.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+402    model.decoder.layers.24.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+403    model.decoder.layers.24.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+404    model.decoder.layers.24.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+405    model.decoder.layers.25.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+406    model.decoder.layers.25.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+407    model.decoder.layers.25.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+408    model.decoder.layers.25.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+409    model.decoder.layers.25.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+410    model.decoder.layers.25.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+411    model.decoder.layers.25.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+412    model.decoder.layers.25.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+413    model.decoder.layers.25.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+414    model.decoder.layers.25.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+415    model.decoder.layers.25.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+416    model.decoder.layers.25.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+417    model.decoder.layers.25.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+418    model.decoder.layers.25.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+419    model.decoder.layers.25.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+420    model.decoder.layers.25.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+421    model.decoder.layers.26.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+422    model.decoder.layers.26.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+423    model.decoder.layers.26.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+424    model.decoder.layers.26.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+425    model.decoder.layers.26.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+426    model.decoder.layers.26.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+427    model.decoder.layers.26.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+428    model.decoder.layers.26.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+429    model.decoder.layers.26.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+430    model.decoder.layers.26.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+431    model.decoder.layers.26.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+432    model.decoder.layers.26.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+433    model.decoder.layers.26.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+434    model.decoder.layers.26.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+435    model.decoder.layers.26.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+436    model.decoder.layers.26.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+437    model.decoder.layers.27.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+438    model.decoder.layers.27.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+439    model.decoder.layers.27.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+440    model.decoder.layers.27.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+441    model.decoder.layers.27.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+442    model.decoder.layers.27.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+443    model.decoder.layers.27.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+444    model.decoder.layers.27.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+445    model.decoder.layers.27.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+446    model.decoder.layers.27.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+447    model.decoder.layers.27.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+448    model.decoder.layers.27.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+449    model.decoder.layers.27.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+450    model.decoder.layers.27.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+451    model.decoder.layers.27.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+452    model.decoder.layers.27.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+453    model.decoder.layers.28.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+454    model.decoder.layers.28.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+455    model.decoder.layers.28.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+456    model.decoder.layers.28.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+457    model.decoder.layers.28.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+458    model.decoder.layers.28.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+459    model.decoder.layers.28.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+460    model.decoder.layers.28.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+461    model.decoder.layers.28.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+462    model.decoder.layers.28.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+463    model.decoder.layers.28.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+464    model.decoder.layers.28.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+465    model.decoder.layers.28.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+466    model.decoder.layers.28.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+467    model.decoder.layers.28.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+468    model.decoder.layers.28.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+469    model.decoder.layers.29.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+470    model.decoder.layers.29.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+471    model.decoder.layers.29.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+472    model.decoder.layers.29.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+473    model.decoder.layers.29.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+474    model.decoder.layers.29.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+475    model.decoder.layers.29.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+476    model.decoder.layers.29.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+477    model.decoder.layers.29.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+478    model.decoder.layers.29.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+479    model.decoder.layers.29.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+480    model.decoder.layers.29.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+481    model.decoder.layers.29.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+482    model.decoder.layers.29.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+483    model.decoder.layers.29.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+484    model.decoder.layers.29.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+485    model.decoder.layers.30.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+486    model.decoder.layers.30.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+487    model.decoder.layers.30.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+488    model.decoder.layers.30.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+489    model.decoder.layers.30.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+490    model.decoder.layers.30.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+491    model.decoder.layers.30.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+492    model.decoder.layers.30.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+493    model.decoder.layers.30.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+494    model.decoder.layers.30.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+495    model.decoder.layers.30.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+496    model.decoder.layers.30.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+497    model.decoder.layers.30.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+498    model.decoder.layers.30.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+499    model.decoder.layers.30.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+500    model.decoder.layers.30.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+501    model.decoder.layers.31.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+502    model.decoder.layers.31.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+503    model.decoder.layers.31.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+504    model.decoder.layers.31.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+505    model.decoder.layers.31.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+506    model.decoder.layers.31.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+507    model.decoder.layers.31.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+508    model.decoder.layers.31.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+509    model.decoder.layers.31.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+510    model.decoder.layers.31.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+511    model.decoder.layers.31.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+512    model.decoder.layers.31.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+513    model.decoder.layers.31.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+514    model.decoder.layers.31.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+515    model.decoder.layers.31.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+516    model.decoder.layers.31.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+517    model.decoder.layers.32.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+518    model.decoder.layers.32.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+519    model.decoder.layers.32.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+520    model.decoder.layers.32.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+521    model.decoder.layers.32.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+522    model.decoder.layers.32.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+523    model.decoder.layers.32.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+524    model.decoder.layers.32.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+525    model.decoder.layers.32.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+526    model.decoder.layers.32.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+527    model.decoder.layers.32.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+528    model.decoder.layers.32.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+529    model.decoder.layers.32.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+530    model.decoder.layers.32.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+531    model.decoder.layers.32.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+532    model.decoder.layers.32.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+533    model.decoder.layers.33.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+534    model.decoder.layers.33.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+535    model.decoder.layers.33.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+536    model.decoder.layers.33.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+537    model.decoder.layers.33.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+538    model.decoder.layers.33.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+539    model.decoder.layers.33.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+540    model.decoder.layers.33.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+541    model.decoder.layers.33.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+542    model.decoder.layers.33.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+543    model.decoder.layers.33.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+544    model.decoder.layers.33.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+545    model.decoder.layers.33.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+546    model.decoder.layers.33.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+547    model.decoder.layers.33.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+548    model.decoder.layers.33.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+549    model.decoder.layers.34.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+550    model.decoder.layers.34.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+551    model.decoder.layers.34.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+552    model.decoder.layers.34.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+553    model.decoder.layers.34.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+554    model.decoder.layers.34.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+555    model.decoder.layers.34.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+556    model.decoder.layers.34.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+557    model.decoder.layers.34.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+558    model.decoder.layers.34.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+559    model.decoder.layers.34.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+560    model.decoder.layers.34.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+561    model.decoder.layers.34.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+562    model.decoder.layers.34.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+563    model.decoder.layers.34.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+564    model.decoder.layers.34.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+565    model.decoder.layers.35.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+566    model.decoder.layers.35.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+567    model.decoder.layers.35.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+568    model.decoder.layers.35.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+569    model.decoder.layers.35.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+570    model.decoder.layers.35.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+571    model.decoder.layers.35.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+572    model.decoder.layers.35.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+573    model.decoder.layers.35.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+574    model.decoder.layers.35.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+575    model.decoder.layers.35.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+576    model.decoder.layers.35.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+577    model.decoder.layers.35.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+578    model.decoder.layers.35.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+579    model.decoder.layers.35.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+580    model.decoder.layers.35.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+581    model.decoder.layers.36.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+582    model.decoder.layers.36.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+583    model.decoder.layers.36.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+584    model.decoder.layers.36.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+585    model.decoder.layers.36.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+586    model.decoder.layers.36.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+587    model.decoder.layers.36.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+588    model.decoder.layers.36.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+589    model.decoder.layers.36.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+590    model.decoder.layers.36.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+591    model.decoder.layers.36.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+592    model.decoder.layers.36.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+593    model.decoder.layers.36.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+594    model.decoder.layers.36.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+595    model.decoder.layers.36.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+596    model.decoder.layers.36.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+597    model.decoder.layers.37.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+598    model.decoder.layers.37.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+599    model.decoder.layers.37.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+600    model.decoder.layers.37.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+601    model.decoder.layers.37.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+602    model.decoder.layers.37.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+603    model.decoder.layers.37.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+604    model.decoder.layers.37.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+605    model.decoder.layers.37.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+606    model.decoder.layers.37.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+607    model.decoder.layers.37.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+608    model.decoder.layers.37.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+609    model.decoder.layers.37.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+610    model.decoder.layers.37.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+611    model.decoder.layers.37.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+612    model.decoder.layers.37.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+613    model.decoder.layers.38.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+614    model.decoder.layers.38.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+615    model.decoder.layers.38.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+616    model.decoder.layers.38.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+617    model.decoder.layers.38.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+618    model.decoder.layers.38.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+619    model.decoder.layers.38.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+620    model.decoder.layers.38.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+621    model.decoder.layers.38.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+622    model.decoder.layers.38.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+623    model.decoder.layers.38.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+624    model.decoder.layers.38.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+625    model.decoder.layers.38.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+626    model.decoder.layers.38.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+627    model.decoder.layers.38.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+628    model.decoder.layers.38.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+629    model.decoder.layers.39.self_attn.k_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+630    model.decoder.layers.39.self_attn.k_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+631    model.decoder.layers.39.self_attn.v_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+632    model.decoder.layers.39.self_attn.v_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+633    model.decoder.layers.39.self_attn.q_proj.weight              (5120, 5120)                   26,214,400      50.0000 torch.float16  
+634    model.decoder.layers.39.self_attn.q_proj.bias                (5120,)                             5,120       0.0098 torch.float16  
+635    model.decoder.layers.39.self_attn.out_proj.weight            (5120, 5120)                   26,214,400      50.0000 torch.float16  
+636    model.decoder.layers.39.self_attn.out_proj.bias              (5120,)                             5,120       0.0098 torch.float16  
+637    model.decoder.layers.39.self_attn_layer_norm.weight          (5120,)                             5,120       0.0098 torch.float16  
+638    model.decoder.layers.39.self_attn_layer_norm.bias            (5120,)                             5,120       0.0098 torch.float16  
+639    model.decoder.layers.39.fc1.weight                           (20480, 5120)                 104,857,600     200.0000 torch.float16  
+640    model.decoder.layers.39.fc1.bias                             (20480,)                           20,480       0.0391 torch.float16  
+641    model.decoder.layers.39.fc2.weight                           (5120, 20480)                 104,857,600     200.0000 torch.float16  
+642    model.decoder.layers.39.fc2.bias                             (5120,)                             5,120       0.0098 torch.float16  
+643    model.decoder.layers.39.final_layer_norm.weight              (5120,)                             5,120       0.0098 torch.float16  
+644    model.decoder.layers.39.final_layer_norm.bias                (5120,)                             5,120       0.0098 torch.float16  
+------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                          12,853,473,280   24516.0547
+========================================================================================================================
+
+
+PARAMETER STATISTICS BY LAYER TYPE:
+------------------------------------------------------------
+Layer Type                                    Count             Elements     Memory (MB)
+-------------------------------------------------------------------------------------
+fc1.weight                                       40        4,194,304,000       8000.0000
+fc2.weight                                       40        4,194,304,000       8000.0000
+k_proj.weight                                    40        1,048,576,000       2000.0000
+v_proj.weight                                    40        1,048,576,000       2000.0000
+q_proj.weight                                    40        1,048,576,000       2000.0000
+out_proj.weight                                  40        1,048,576,000       2000.0000
+embed_tokens.weight                               1          257,392,640        490.9375
+embed_positions.weight                            1           10,496,000         20.0195
+fc1.bias                                         40              819,200          1.5625
+final_layer_norm.weight                          41              209,920          0.4004
+final_layer_norm.bias                            41              209,920          0.4004
+k_proj.bias                                      40              204,800          0.3906
+v_proj.bias                                      40              204,800          0.3906
+q_proj.bias                                      40              204,800          0.3906
+out_proj.bias                                    40              204,800          0.3906
+self_attn_layer_norm.weight                      40              204,800          0.3906
+self_attn_layer_norm.bias                        40              204,800          0.3906
+fc2.bias                                         40              204,800          0.3906

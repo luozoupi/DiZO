@@ -1,0 +1,116 @@
+========================================================================================================================
+PARAMETER SHAPES FOR ZO PERTURBATION AND UPDATE
+========================================================================================================================
+
+Model: facebook/opt-350m
+Total trainable parameters: 96
+
+No.    Parameter Name                                               Shape                            Elements  Memory (MB) Dtype          
+------------------------------------------------------------------------------------------------------------------------
+1      model.decoder.layers.0.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+2      model.decoder.layers.0.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+3      model.decoder.layers.0.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+4      model.decoder.layers.0.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+5      model.decoder.layers.1.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+6      model.decoder.layers.1.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+7      model.decoder.layers.1.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+8      model.decoder.layers.1.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+9      model.decoder.layers.2.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+10     model.decoder.layers.2.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+11     model.decoder.layers.2.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+12     model.decoder.layers.2.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+13     model.decoder.layers.3.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+14     model.decoder.layers.3.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+15     model.decoder.layers.3.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+16     model.decoder.layers.3.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+17     model.decoder.layers.4.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+18     model.decoder.layers.4.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+19     model.decoder.layers.4.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+20     model.decoder.layers.4.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+21     model.decoder.layers.5.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+22     model.decoder.layers.5.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+23     model.decoder.layers.5.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+24     model.decoder.layers.5.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+25     model.decoder.layers.6.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+26     model.decoder.layers.6.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+27     model.decoder.layers.6.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+28     model.decoder.layers.6.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+29     model.decoder.layers.7.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+30     model.decoder.layers.7.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+31     model.decoder.layers.7.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+32     model.decoder.layers.7.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+33     model.decoder.layers.8.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+34     model.decoder.layers.8.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+35     model.decoder.layers.8.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+36     model.decoder.layers.8.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+37     model.decoder.layers.9.self_attn.v_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+38     model.decoder.layers.9.self_attn.v_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+39     model.decoder.layers.9.self_attn.q_proj.lora_A               (64, 1024)                         65,536       0.1250 torch.float16  
+40     model.decoder.layers.9.self_attn.q_proj.lora_B               (1024, 64)                         65,536       0.1250 torch.float16  
+41     model.decoder.layers.10.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+42     model.decoder.layers.10.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+43     model.decoder.layers.10.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+44     model.decoder.layers.10.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+45     model.decoder.layers.11.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+46     model.decoder.layers.11.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+47     model.decoder.layers.11.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+48     model.decoder.layers.11.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+49     model.decoder.layers.12.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+50     model.decoder.layers.12.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+51     model.decoder.layers.12.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+52     model.decoder.layers.12.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+53     model.decoder.layers.13.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+54     model.decoder.layers.13.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+55     model.decoder.layers.13.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+56     model.decoder.layers.13.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+57     model.decoder.layers.14.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+58     model.decoder.layers.14.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+59     model.decoder.layers.14.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+60     model.decoder.layers.14.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+61     model.decoder.layers.15.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+62     model.decoder.layers.15.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+63     model.decoder.layers.15.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+64     model.decoder.layers.15.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+65     model.decoder.layers.16.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+66     model.decoder.layers.16.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+67     model.decoder.layers.16.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+68     model.decoder.layers.16.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+69     model.decoder.layers.17.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+70     model.decoder.layers.17.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+71     model.decoder.layers.17.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+72     model.decoder.layers.17.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+73     model.decoder.layers.18.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+74     model.decoder.layers.18.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+75     model.decoder.layers.18.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+76     model.decoder.layers.18.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+77     model.decoder.layers.19.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+78     model.decoder.layers.19.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+79     model.decoder.layers.19.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+80     model.decoder.layers.19.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+81     model.decoder.layers.20.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+82     model.decoder.layers.20.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+83     model.decoder.layers.20.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+84     model.decoder.layers.20.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+85     model.decoder.layers.21.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+86     model.decoder.layers.21.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+87     model.decoder.layers.21.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+88     model.decoder.layers.21.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+89     model.decoder.layers.22.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+90     model.decoder.layers.22.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+91     model.decoder.layers.22.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+92     model.decoder.layers.22.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+93     model.decoder.layers.23.self_attn.v_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+94     model.decoder.layers.23.self_attn.v_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+95     model.decoder.layers.23.self_attn.q_proj.lora_A              (64, 1024)                         65,536       0.1250 torch.float16  
+96     model.decoder.layers.23.self_attn.q_proj.lora_B              (1024, 64)                         65,536       0.1250 torch.float16  
+------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                               6,291,456      12.0000
+========================================================================================================================
+
+
+PARAMETER STATISTICS BY LAYER TYPE:
+------------------------------------------------------------
+Layer Type                                    Count             Elements     Memory (MB)
+-------------------------------------------------------------------------------------
+lora_A                                           48            3,145,728          6.0000
+lora_B                                           48            3,145,728          6.0000
