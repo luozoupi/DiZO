@@ -1,2 +1,0 @@
-dizo_fused_kernels_cuda
-dizo_fused_kernels_cuda_wrapper

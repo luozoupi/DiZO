@@ -1,0 +1,2 @@
+large_models/cuda_kernels/benchmark_results/profiler_logs/nsys/*.sqlite
+large_models/cuda_kernels/benchmark_results/profiler_logs/nsys/*.nsys-rep

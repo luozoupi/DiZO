@@ -159,11 +159,38 @@ try:
     zo_so_path = os.path.join(SCRIPT_DIR, 'zo_foward_wise')
     if zo_so_path not in sys.path:
         sys.path.insert(0, zo_so_path)
+
+    # If the extension was built without --inplace, it may live under build/lib.*
+    try:
+        import glob
+        for lib_dir in glob.glob(os.path.join(zo_so_path, 'build', 'lib.*')):
+            if lib_dir not in sys.path:
+                sys.path.insert(0, lib_dir)
+    except Exception:
+        pass
+
+    # Ensure PyTorch shared libraries (e.g., libc10.so) are discoverable when
+    # importing the CUDA extension.
+    # This avoids ImportError: libc10.so: cannot open shared object file.
+    try:
+        import ctypes
+        import torch
+
+        torch_lib = os.path.join(os.path.dirname(torch.__file__), 'lib')
+        if os.path.isdir(torch_lib):
+            os.environ['LD_LIBRARY_PATH'] = torch_lib + ':' + os.environ.get('LD_LIBRARY_PATH', '')
+            for libname in ('libc10.so', 'libtorch.so', 'libtorch_python.so'):
+                libpath = os.path.join(torch_lib, libname)
+                if os.path.exists(libpath):
+                    ctypes.CDLL(libpath, mode=ctypes.RTLD_GLOBAL)
+    except Exception:
+        pass
+
     import dizo_fused_kernels_cuda_v5 as cuda_zo_v5
     HAS_CUDA_ZO_V5 = True
     print(f"✓ CUDA ZO V5 loaded: {[x for x in dir(cuda_zo_v5) if not x.startswith('_')]}")
-except ImportError as e:
-    pass  # Optional
+except Exception as e:
+    print(f"Warning: CUDA ZO V5 not available: {e}")
 
 
 # =============================================================================
@@ -517,7 +544,22 @@ def dummy_forward():
     """Minimal forward pass simulation."""
     # Just a small matmul to simulate some GPU work
     x = torch.randn(256, 256, device='cuda')
-    _ = x @ x.T
+    y = x @ x.T
+    return y.sum().item()
+
+
+def _backend_needs_flat(backend: str) -> bool:
+    """Return True if this backend requires flat buffers (param_flat/anchor_flat)."""
+    return backend in {
+        'all',
+        'triton-perturb',
+        'cuda-perturb',
+        'triton-zo-v2',
+        'cuda-triton',
+        'cuda-full',
+        'triton-mezo',
+        'cuda-mezo',
+    }
     return 1.0 + np.random.rand() * 0.1
 
 
@@ -1365,77 +1407,23 @@ def benchmark_cuda_full(
 
 
 # =============================================================================
-# Direct Flat Tensor Creation (Memory-Efficient for Very Large Models)
-# =============================================================================
-
-def create_flat_params_directly(config: Dict, device: torch.device):
-    """
-    Create flattened parameter tensors DIRECTLY without intermediate param_groups.
-    
-    For very large models (>10B params), creating param_groups first then flattening
-    doubles the memory requirement. This function computes the sizes and creates
-    flat tensors directly.
-    
-    Returns:
-        param_flat: Flat tensor with all parameters
-        anchor_flat: Flat tensor with anchor parameters
-        offsets: Tensor of offsets for each parameter group
-        sizes: Tensor of sizes for each parameter group
-        
-    Note: Does NOT return param_views/anchor_views - those are only needed for
-          PyTorch baseline benchmarks which we skip for very large models anyway.
-    """
-    num_layers = config['num_layers']
-    hidden_size = config['hidden_size']
-    ffn_hidden = config.get('ffn_hidden', 4 * hidden_size)
-    
-    # Compute sizes for each layer (same logic as create_param_groups)
-    sizes_list = []
-    for _ in range(num_layers):
-        # Self-attention: Q, K, V, O projections
-        sizes_list.append(hidden_size * hidden_size)  # Q
-        sizes_list.append(hidden_size * hidden_size)  # K  
-        sizes_list.append(hidden_size * hidden_size)  # V
-        sizes_list.append(hidden_size * hidden_size)  # O
-        
-        # FFN: fc1 and fc2
-        sizes_list.append(hidden_size * ffn_hidden)  # fc1
-        sizes_list.append(ffn_hidden * hidden_size)  # fc2
-        
-        # LayerNorms (small)
-        sizes_list.append(hidden_size)  # ln1 gamma
-        sizes_list.append(hidden_size)  # ln2 gamma
-    
-    total_elements = sum(sizes_list)
-    num_groups = len(sizes_list)
-    
-    print(f"  [Direct allocation] {num_groups} groups, {total_elements:,} elements ({total_elements*4/1e9:.2f} GB per tensor)")
-    
-    # Create flat tensors directly
-    param_flat = torch.randn(total_elements, device=device, dtype=torch.float32)
-    anchor_flat = torch.randn(total_elements, device=device, dtype=torch.float32)
-    
-    # Compute offsets
-    offsets_list = [0]
-    for s in sizes_list[:-1]:
-        offsets_list.append(offsets_list[-1] + s)
-    
-    offsets = torch.tensor(offsets_list, dtype=torch.int64, device=device)
-    sizes = torch.tensor(sizes_list, dtype=torch.int64, device=device)
-    
-    return param_flat, anchor_flat, offsets, sizes
-
-
-# =============================================================================
 # Main Benchmark Runner
 # =============================================================================
 
 def run_benchmarks(args):
     """Run all benchmarks."""
+    device_id = int(getattr(args, 'gpu', 0))
+    if torch.cuda.device_count() <= device_id:
+        raise RuntimeError(
+            f"Requested --gpu {device_id}, but only {torch.cuda.device_count()} CUDA device(s) visible"
+        )
+    torch.cuda.set_device(device_id)
+    device = torch.device(f'cuda:{device_id}')
+
     print("=" * 90)
     print("INTEGRATED BENCHMARK V2: Full MeZO/DiZO Training Step")
     print("=" * 90)
-    print(f"Device: {torch.cuda.get_device_name(0)}")
+    print(f"Device: cuda:{device_id} ({torch.cuda.get_device_name(device_id)})")
     print(f"CUDA: {torch.version.cuda}, PyTorch: {torch.__version__}")
     print()
     
@@ -1468,17 +1456,24 @@ def run_benchmarks(args):
     print(f"  Expected params: {config['total_params']:,}")
     print()
     
-    device = torch.device('cuda')
-    
     # Check if user explicitly requested PyTorch baselines
     pytorch_baseline_requested = args.backend in ('pytorch-mezo', 'pytorch-dizo')
+    needs_flat = _backend_needs_flat(args.backend)
     
-    # For very large models (>10B params), use direct allocation for kernel benchmarks
-    is_very_large_model = config['total_params'] > 10_000_000_000
+    # Decide allocation strategy for kernel benchmarks.
+    # The create_param_groups() + flatten_once(torch.cat) path has a ~4x param_size
+    # peak (groups+anchors plus new flat buffers). For large models this can OOM.
+    total_params = int(config['total_params'])
+    param_bytes = total_params * 4  # fp32
+    available_bytes = int(torch.cuda.get_device_properties(device_id).total_memory)
+    peak_bytes_cat_flatten = param_bytes * 4
+    safe_headroom_bytes = int(available_bytes * 0.85)
+    can_fit_cat_flatten = peak_bytes_cat_flatten < safe_headroom_bytes
+    use_direct_allocation = needs_flat and (not can_fit_cat_flatten)
     
     # Estimate memory needed for baseline (param_list + anchor_list = 2x param size)
     baseline_mem_gb = config['total_params'] * 4 * 2 / 1e9
-    available_mem_gb = torch.cuda.get_device_properties(device).total_memory / 1e9
+    available_mem_gb = torch.cuda.get_device_properties(device_id).total_memory / 1e9
     
     # Check if we can fit baseline allocation
     can_fit_baseline = baseline_mem_gb < available_mem_gb * 0.85  # Leave 15% headroom
@@ -1499,37 +1494,49 @@ def run_benchmarks(args):
         is_large_model = n_elements > 2_000_000_000
         
     else:
-        # Determine which allocation strategy to use for kernel benchmarks
-        use_direct_allocation = is_very_large_model
-    
-        # Create flat tensors for kernel-based benchmarks
-        if use_direct_allocation:
-            print("[LARGE MODEL MODE - Direct flat tensor allocation for kernel benchmarks]")
+        # Create flat tensors for kernel-based benchmarks, without creating per-parameter tensors.
+        if not needs_flat:
+            # e.g. pytorch baselines handled above; keep placeholders.
+            param_flat = anchor_flat = offsets = sizes = None
+            n_elements = config['total_params']
+            is_large_model = n_elements > 2_000_000_000
+        elif use_direct_allocation:
+            free_bytes, total_bytes = torch.cuda.mem_get_info(device_id)
+            required_bytes = param_bytes * 2
+            if free_bytes < required_bytes:
+                print("[ERROR] Not enough free VRAM for flat buffers")
+                print(f"  Need (param+anchor) ~{required_bytes / 1024**3:.1f} GiB free")
+                print(f"  Free now: {free_bytes / 1024**3:.1f} GiB (total {total_bytes / 1024**3:.1f} GiB)")
+                print("  Tip: pick a different GPU via --gpu, or free VRAM (e.g., stop other jobs).")
+                return []
+
+            print("[FLAT-ONLY MODE - Direct allocation for kernel benchmarks]")
+            print(f"  Reason: cat-flatten peak ~{peak_bytes_cat_flatten / 1024**3:.1f} GiB would exceed headroom")
+            print(f"  GPU total: {available_bytes / 1024**3:.1f} GiB, headroom target: {safe_headroom_bytes / 1024**3:.1f} GiB")
             print()
-            
-            # Create flat tensors directly without intermediate param_groups
-            param_flat, anchor_flat, offsets, sizes = create_flat_params_directly(config, device)
+            param_flat, anchor_flat, offsets, sizes, _ = create_flat_params_directly(config, device)
             print(f"  Flat buffer: {param_flat.numel():,} elements")
             print()
+            n_elements = param_flat.numel()
+            is_large_model = n_elements > 2_000_000_000
         else:
-            # Standard path: create param_groups then flatten
+            # Standard path: create param_groups then flatten. (OK for smaller models.)
             print("Creating parameters...")
             param_groups, anchor_groups = create_param_groups(config, device)
             print(f"  Groups: {len(param_groups)}, Elements: {sum(p.numel() for p in param_groups):,}")
-            
-            # Flatten ONCE before all benchmarks - returns views that share memory
+
             print("Flattening parameters (ONCE)...")
             param_flat, anchor_flat, offsets, sizes, param_views, anchor_views = flatten_once(param_groups, anchor_groups, device)
             print(f"  Flat buffer: {param_flat.numel():,} elements")
             print()
-            
-            # For models >2B params, delete param_groups immediately  
+
+            # For models >2B params, delete param_groups immediately
             if param_flat.numel() > 2_000_000_000:
                 del param_groups, anchor_groups
                 cleanup_gpu(force_empty=True)
-        
-        n_elements = param_flat.numel()
-        is_large_model = n_elements > 2_000_000_000
+
+            n_elements = param_flat.numel()
+            is_large_model = n_elements > 2_000_000_000
     
     cfg = TrainingConfig(eps=args.eps, lr=args.lr, tau=args.tau, 
                         zo_eps=args.zo_eps, step_size=args.step_size)
@@ -1545,8 +1552,8 @@ def run_benchmarks(args):
         
         # For very large models, warmup on param_flat directly (then restore from anchor_flat)
         # For smaller models, use separate warmup tensor to avoid polluting benchmark data
-        if is_very_large_model:
-            print("  [Very large model: warming up on param_flat directly]")
+        if use_direct_allocation:
+            print("  [Flat-only mode: warming up on param_flat directly]")
             warmup_target = param_flat
         else:
             warmup_target = None  # Will create separate tensor
@@ -1582,7 +1589,7 @@ def run_benchmarks(args):
             print("  CUDA perturb warmup complete")
         
         # For very large models, restore param_flat from anchor_flat after warmup
-        if is_very_large_model:
+        if use_direct_allocation:
             param_flat.copy_(anchor_flat)
             torch.cuda.synchronize()
             print("  Restored param_flat from anchor_flat")
@@ -1900,6 +1907,7 @@ Available backends:
 """
     )
     parser.add_argument('--model', type=str, default='opt-350m', choices=list(MODEL_CONFIGS.keys()))
+    parser.add_argument('--gpu', type=int, default=0, help='CUDA device index to run on (0-based, within visible devices)')
     parser.add_argument('--n_iter', type=int, default=20)
     parser.add_argument('--warmup', type=int, default=5)
     parser.add_argument('--eps', type=float, default=1e-3)

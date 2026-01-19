@@ -1,8 +1,0 @@
-README.md
-dizo_fused_kernels.cu
-dizo_fused_kernels_cuda_wrapper.py
-setup.py
-dizo_fused_kernels_cuda.egg-info/PKG-INFO
-dizo_fused_kernels_cuda.egg-info/SOURCES.txt
-dizo_fused_kernels_cuda.egg-info/dependency_links.txt
-dizo_fused_kernels_cuda.egg-info/top_level.txt

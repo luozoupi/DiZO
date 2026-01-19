@@ -98,6 +98,7 @@ HAS_CUDA_PERTURB = False
 HAS_TRITON_ZO_V1 = False
 HAS_TRITON_ZO_V2 = False
 HAS_CUDA_ZO_V5 = False
+HAS_TRITON_PHILOX = False
 
 # Triton base
 try:
@@ -238,6 +239,115 @@ if HAS_TRITON:
     
     HAS_TRITON_RUNTIME_SEED = True
     print("✓ Triton runtime-seed kernels defined (avoid recompilation)")
+
+
+# =============================================================================
+# Optimized Triton Philox 2x Kernels (custom Philox RNG, 2x batching)
+# =============================================================================
+
+HAS_TRITON_PHILOX = False
+if HAS_TRITON:
+    @triton.jit
+    def philox_round(c0, c1, c2, c3, k0, k1):
+        """Single Philox 4x32 round."""
+        M0 = 0xD2511F53
+        M1 = 0xCD9E8D57
+        prod0 = c0.to(tl.uint64) * M0
+        hi0 = (prod0 >> 32).to(tl.uint32)
+        lo0 = (prod0 & 0xFFFFFFFF).to(tl.uint32)
+        prod1 = c2.to(tl.uint64) * M1
+        hi1 = (prod1 >> 32).to(tl.uint32)
+        lo1 = (prod1 & 0xFFFFFFFF).to(tl.uint32)
+        return hi1 ^ c1 ^ k0, lo1, hi0 ^ c3 ^ k1, lo0
+
+    @triton.jit
+    def philox_4x32_10(seed, offset):
+        """Philox 4x32-10 RNG."""
+        W0 = 0x9E3779B9
+        W1 = 0xBB67AE85
+        c0 = offset.to(tl.uint32)
+        c1 = tl.zeros_like(c0)
+        c2 = tl.zeros_like(c0)
+        c3 = tl.zeros_like(c0)
+        k0 = tl.full(offset.shape, seed, dtype=tl.uint32)
+        k1 = tl.zeros_like(k0)
+        for _ in tl.static_range(10):
+            c0, c1, c2, c3 = philox_round(c0, c1, c2, c3, k0, k1)
+            k0 = k0 + W0
+            k1 = k1 + W1
+        return c0, c1, c2, c3
+
+    @triton.autotune(
+        configs=[
+            triton.Config({'BLOCK_SIZE': 512}, num_warps=4),
+            triton.Config({'BLOCK_SIZE': 1024}, num_warps=4),
+            triton.Config({'BLOCK_SIZE': 2048}, num_warps=8),
+            triton.Config({'BLOCK_SIZE': 4096}, num_warps=8),
+        ],
+        key=['n_elements'],
+    )
+    @triton.jit
+    def fused_perturb_philox_2x(params_ptr, seed_ptr, alpha, n_elements, BLOCK_SIZE: tl.constexpr):
+        """Optimized perturb using Philox 2x batching (uses both Box-Muller outputs)."""
+        TWO_PI = 6.283185307179586
+        UINT32_TO_FLOAT = 1.0 / 4294967296.0
+        seed = tl.load(seed_ptr).to(tl.int32)
+        pid = tl.program_id(0)
+        block_start = pid.to(tl.int64) * BLOCK_SIZE * 2
+        offsets_0 = block_start + tl.arange(0, BLOCK_SIZE).to(tl.int64)
+        offsets_1 = block_start + BLOCK_SIZE + tl.arange(0, BLOCK_SIZE).to(tl.int64)
+        mask_0 = offsets_0 < n_elements
+        mask_1 = offsets_1 < n_elements
+        p0 = tl.load(params_ptr + offsets_0, mask=mask_0, other=0.0)
+        p1 = tl.load(params_ptr + offsets_1, mask=mask_1, other=0.0)
+        philox_offset = block_start // 2 + tl.arange(0, BLOCK_SIZE).to(tl.int64)
+        r0, r1, r2, r3 = philox_4x32_10(seed, philox_offset)
+        u0 = (r0.to(tl.float32) + 0.5) * UINT32_TO_FLOAT
+        u1 = (r1.to(tl.float32) + 0.5) * UINT32_TO_FLOAT
+        r_bm = tl.sqrt(-2.0 * tl.log(u0))
+        theta = TWO_PI * u1
+        z0 = r_bm * tl.cos(theta)
+        z1 = r_bm * tl.sin(theta)
+        tl.store(params_ptr + offsets_0, p0 + alpha * z0, mask=mask_0)
+        tl.store(params_ptr + offsets_1, p1 + alpha * z1, mask=mask_1)
+
+    @triton.autotune(
+        configs=[
+            triton.Config({'BLOCK_SIZE': 512}, num_warps=4),
+            triton.Config({'BLOCK_SIZE': 1024}, num_warps=4),
+            triton.Config({'BLOCK_SIZE': 2048}, num_warps=8),
+            triton.Config({'BLOCK_SIZE': 4096}, num_warps=8),
+        ],
+        key=['n_elements'],
+    )
+    @triton.jit
+    def fused_update_philox_2x(params_ptr, seed_ptr, projected_grad, lr, n_elements, BLOCK_SIZE: tl.constexpr):
+        """Optimized update using Philox 2x batching."""
+        TWO_PI = 6.283185307179586
+        UINT32_TO_FLOAT = 1.0 / 4294967296.0
+        seed = tl.load(seed_ptr).to(tl.int32)
+        pid = tl.program_id(0)
+        block_start = pid.to(tl.int64) * BLOCK_SIZE * 2
+        offsets_0 = block_start + tl.arange(0, BLOCK_SIZE).to(tl.int64)
+        offsets_1 = block_start + BLOCK_SIZE + tl.arange(0, BLOCK_SIZE).to(tl.int64)
+        mask_0 = offsets_0 < n_elements
+        mask_1 = offsets_1 < n_elements
+        p0 = tl.load(params_ptr + offsets_0, mask=mask_0, other=0.0)
+        p1 = tl.load(params_ptr + offsets_1, mask=mask_1, other=0.0)
+        philox_offset = block_start // 2 + tl.arange(0, BLOCK_SIZE).to(tl.int64)
+        r0, r1, r2, r3 = philox_4x32_10(seed, philox_offset)
+        u0 = (r0.to(tl.float32) + 0.5) * UINT32_TO_FLOAT
+        u1 = (r1.to(tl.float32) + 0.5) * UINT32_TO_FLOAT
+        r_bm = tl.sqrt(-2.0 * tl.log(u0))
+        theta = TWO_PI * u1
+        z0 = r_bm * tl.cos(theta)
+        z1 = r_bm * tl.sin(theta)
+        scale = -lr * projected_grad
+        tl.store(params_ptr + offsets_0, p0 + scale * z0, mask=mask_0)
+        tl.store(params_ptr + offsets_1, p1 + scale * z1, mask=mask_1)
+
+    HAS_TRITON_PHILOX = True
+
 
 
 # =============================================================================
@@ -517,8 +627,24 @@ def dummy_forward():
     """Minimal forward pass simulation."""
     # Just a small matmul to simulate some GPU work
     x = torch.randn(256, 256, device='cuda')
-    _ = x @ x.T
-    return 1.0 + np.random.rand() * 0.1
+    y = x @ x.T
+    return y.sum().item()
+
+
+def _backend_needs_flat(backend: str) -> bool:
+    """Return True if this backend requires flat buffers (param_flat/anchor_flat)."""
+    return backend in {
+        'all',
+        'triton-perturb',
+        'cuda-perturb',
+        'triton-zo-v2',
+        'triton-philox-zo-v2',
+        'cuda-triton',
+        'cuda-full',
+        'triton-mezo',
+        'triton-philox-mezo',
+        'cuda-mezo',
+    }
 
 
 # =============================================================================
@@ -1009,10 +1135,17 @@ def benchmark_triton_full(
     sizes: torch.Tensor,
     cfg: TrainingConfig,
     n_iter: int,
+    include_dizo: bool = True,
 ) -> BenchmarkResult:
     """
     Fully optimized: Triton Perturb + Triton ZO-Forward V2.
     Uses runtime-seed kernels to avoid Triton recompilation.
+    
+    NOTE: For large models (>2B params), Triton perturb is slow due to tl.randn() overhead.
+    Consider using benchmark_cuda_perturb_triton_zo() instead which uses CUDA perturb.
+    
+    Args:
+        include_dizo: If False, skip DiZO constraint operations (MeZO-only mode).
     """
     if not HAS_TRITON_RUNTIME_SEED or not HAS_TRITON_ZO_V2:
         missing = []
@@ -1043,6 +1176,11 @@ def benchmark_triton_full(
     cleanup_gpu()
     torch.cuda.reset_peak_memory_stats()
     
+    # Track per-operation timing with CUDA events (accurate)
+    perturb_time = 0.0
+    zo_time = 0.0
+    update_time = 0.0
+    
     # Warmup with runtime seed kernels
     seed_tensor[0] = 42
     for _ in range(5):
@@ -1056,60 +1194,183 @@ def benchmark_triton_full(
         zo_kernels.update_gamma(constraints, norms_warm, 0.001, cfg.step_size, cfg.tau)
     torch.cuda.synchronize()
     
-    # Use perf_counter for total (no per-op sync overhead)
-    torch.cuda.synchronize()
-    start = time.perf_counter()
-    
     for _ in range(n_iter):
         seed_tensor[0] = np.random.randint(1000000000)
         
         # === Perturb +eps ===
-        fused_perturb_runtime_seed[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        with cuda_timer() as t:
+            fused_perturb_runtime_seed[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        perturb_time += t['ms']
         
         loss1 = dummy_forward()
         
         # === ZO-Forward: Compute norms + Apply constraints (FUSED V2) ===
-        norms = zo_kernels.compute_norms(param_flat, anchor_flat, offsets, sizes)
-        alphas = zo_kernels.apply_constraints(param_flat, anchor_flat, offsets, sizes, 
-                                               constraints, norms)
+        if include_dizo:
+            with cuda_timer() as t:
+                norms = zo_kernels.compute_norms(param_flat, anchor_flat, offsets, sizes)
+                alphas = zo_kernels.apply_constraints(param_flat, anchor_flat, offsets, sizes, 
+                                                       constraints, norms)
+            zo_time += t['ms']
         
         # === Perturb -2eps ===
-        fused_perturb_runtime_seed[grid](param_flat, seed_tensor, -2*cfg.eps, n_elements)
+        with cuda_timer() as t:
+            fused_perturb_runtime_seed[grid](param_flat, seed_tensor, -2*cfg.eps, n_elements)
+        perturb_time += t['ms']
         
         loss2 = dummy_forward()
         
         # === ZO-Forward: Reverse constraints (FUSED V2) ===
-        zo_kernels.reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
+        if include_dizo:
+            with cuda_timer() as t:
+                zo_kernels.reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
+            zo_time += t['ms']
         
         projected_grad = (loss1 - loss2) / (2 * cfg.eps)
         
         # === Perturb reset ===
-        fused_perturb_runtime_seed[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        with cuda_timer() as t:
+            fused_perturb_runtime_seed[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        perturb_time += t['ms']
         
         # === Update ===
-        fused_update_runtime_seed[grid](param_flat, seed_tensor, projected_grad, cfg.lr, n_elements)
+        with cuda_timer() as t:
+            fused_update_runtime_seed[grid](param_flat, seed_tensor, projected_grad, cfg.lr, n_elements)
+        update_time += t['ms']
         
         # === Gamma update (V2) ===
-        zs = zo_kernels.perturb_gamma(constraints, norms, 1.0, cfg.tau, cfg.zo_eps, generate_new=True)
-        zo_kernels.update_gamma(constraints, norms, projected_grad, cfg.step_size, cfg.tau)
+        if include_dizo:
+            with cuda_timer() as t:
+                zs = zo_kernels.perturb_gamma(constraints, norms, 1.0, cfg.tau, cfg.zo_eps, generate_new=True)
+                zo_kernels.update_gamma(constraints, norms, projected_grad, cfg.step_size, cfg.tau)
+            zo_time += t['ms']
     
     torch.cuda.synchronize()
-    total = (time.perf_counter() - start) * 1000 / n_iter
+    # Use actual measured times (not estimates)
+    total = (perturb_time + zo_time + update_time) / n_iter
     mem = torch.cuda.max_memory_allocated() / 1024**2
     
-    # Estimate per-step breakdown
-    perturb_ratio = 8.5 / total if total > 0 else 0.1
-    perturb_time = total * min(perturb_ratio, 0.3)  # Cap at 30% for full DiZO
-    zo_time = total - perturb_time
-    
+    method_name = "Triton Perturb + Triton ZO V2" if include_dizo else "Triton V2 (MeZO only)"
     return BenchmarkResult(
-        method="Triton Perturb + Triton ZO V2",
+        method=method_name,
         total_time_ms=total,
         memory_mb=mem,
-        kernel_launches=10,  # 4 perturb + 6 zo
-        perturb_ms=perturb_time * 0.75,
-        zo_forward_ms=zo_time,
-        update_ms=perturb_time * 0.25,
+        kernel_launches=4 if not include_dizo else 10,  # 4 perturb + 6 zo
+        perturb_ms=perturb_time / n_iter,
+        zo_forward_ms=zo_time / n_iter if include_dizo else 0.0,
+        update_ms=update_time / n_iter,
+    )
+
+
+# =============================================================================
+# Benchmark: Triton Philox Perturb + Triton ZO-Forward V2
+# =============================================================================
+
+def benchmark_triton_philox_full(
+    param_flat: torch.Tensor,
+    anchor_flat: torch.Tensor,
+    offsets: torch.Tensor,
+    sizes: torch.Tensor,
+    cfg: TrainingConfig,
+    n_iter: int,
+    include_dizo: bool = True,
+) -> BenchmarkResult:
+    """Philox-optimized Triton perturb/update + Triton ZO-Forward V2 (optional)."""
+    if not HAS_TRITON_PHILOX:
+        return BenchmarkResult(method="Triton Philox (N/A)", total_time_ms=-1, memory_mb=0)
+    if include_dizo and not HAS_TRITON_ZO_V2:
+        return BenchmarkResult(method="Triton Philox + Triton ZO V2 (N/A)", total_time_ms=-1, memory_mb=0)
+
+    device = param_flat.device
+    n_elements = param_flat.numel()
+    num_params = offsets.shape[0]
+
+    zo_kernels = None
+    constraints = None
+    if include_dizo:
+        zo_kernels = FusedDiZOKernelsV2(num_params, n_elements, device, offsets, sizes)
+        constraints = torch.rand(num_params, device=device) * 0.1
+
+    # Each program generates 2*BLOCK_SIZE perturb values
+    grid = lambda meta: (triton.cdiv(n_elements, meta['BLOCK_SIZE'] * 2),)
+    seed_tensor = torch.tensor([0], dtype=torch.int64, device=device)
+
+    cleanup_gpu()
+    torch.cuda.reset_peak_memory_stats()
+
+    perturb_time = 0.0
+    zo_time = 0.0
+    update_time = 0.0
+
+    # Warmup
+    seed_tensor[0] = 42
+    for _ in range(5):
+        fused_perturb_philox_2x[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        fused_update_philox_2x[grid](param_flat, seed_tensor, 0.001, cfg.lr, n_elements)
+        if include_dizo:
+            norms_warm = zo_kernels.compute_norms(param_flat, anchor_flat, offsets, sizes)
+            alphas_warm = zo_kernels.apply_constraints(param_flat, anchor_flat, offsets, sizes,
+                                                       constraints, norms_warm)
+            zo_kernels.reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas_warm)
+            zo_kernels.perturb_gamma(constraints, norms_warm, 1.0, cfg.tau, cfg.zo_eps, generate_new=True)
+            zo_kernels.update_gamma(constraints, norms_warm, 0.001, cfg.step_size, cfg.tau)
+    torch.cuda.synchronize()
+
+    for _ in range(n_iter):
+        seed_tensor[0] = np.random.randint(1000000000)
+
+        with cuda_timer() as t:
+            fused_perturb_philox_2x[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        perturb_time += t['ms']
+
+        loss1 = dummy_forward()
+
+        if include_dizo:
+            with cuda_timer() as t:
+                norms = zo_kernels.compute_norms(param_flat, anchor_flat, offsets, sizes)
+                alphas = zo_kernels.apply_constraints(param_flat, anchor_flat, offsets, sizes,
+                                                     constraints, norms)
+            zo_time += t['ms']
+
+        with cuda_timer() as t:
+            fused_perturb_philox_2x[grid](param_flat, seed_tensor, -2 * cfg.eps, n_elements)
+        perturb_time += t['ms']
+
+        loss2 = dummy_forward()
+
+        if include_dizo:
+            with cuda_timer() as t:
+                zo_kernels.reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
+            zo_time += t['ms']
+
+        projected_grad = (loss1 - loss2) / (2 * cfg.eps)
+
+        with cuda_timer() as t:
+            fused_perturb_philox_2x[grid](param_flat, seed_tensor, cfg.eps, n_elements)
+        perturb_time += t['ms']
+
+        with cuda_timer() as t:
+            fused_update_philox_2x[grid](param_flat, seed_tensor, projected_grad, cfg.lr, n_elements)
+        update_time += t['ms']
+
+        if include_dizo:
+            with cuda_timer() as t:
+                zs = zo_kernels.perturb_gamma(constraints, norms, 1.0, cfg.tau, cfg.zo_eps, generate_new=True)
+                zo_kernels.update_gamma(constraints, norms, projected_grad, cfg.step_size, cfg.tau)
+            zo_time += t['ms']
+
+    torch.cuda.synchronize()
+    total = (perturb_time + zo_time + update_time) / n_iter
+    mem = torch.cuda.max_memory_allocated() / 1024**2
+
+    method_name = "Triton Philox Perturb + Triton ZO V2" if include_dizo else "Triton Philox (MeZO only)"
+    return BenchmarkResult(
+        method=method_name,
+        total_time_ms=total,
+        memory_mb=mem,
+        kernel_launches=4 if not include_dizo else 10,
+        perturb_ms=perturb_time / n_iter,
+        zo_forward_ms=zo_time / n_iter if include_dizo else 0.0,
+        update_ms=update_time / n_iter,
     )
 
 
@@ -1124,9 +1385,13 @@ def benchmark_cuda_perturb_triton_zo(
     sizes: torch.Tensor,
     cfg: TrainingConfig,
     n_iter: int,
+    include_dizo: bool = True,
 ) -> BenchmarkResult:
     """
     CUDA Perturb + Triton ZO-Forward V2.
+    
+    Args:
+        include_dizo: If False, skip DiZO constraint operations (MeZO-only mode).
     """
     if not HAS_CUDA_PERTURB or not HAS_TRITON_ZO_V2:
         missing = []
@@ -1171,11 +1436,12 @@ def benchmark_cuda_perturb_triton_zo(
         
         loss1 = dummy_forward()
         
-        with cuda_timer() as t:
-            norms = zo_kernels.compute_norms(param_flat, anchor_flat, offsets, sizes)
-            alphas = zo_kernels.apply_constraints(param_flat, anchor_flat, offsets, sizes,
-                                                   constraints, norms)
-        zo_time += t['ms']
+        if include_dizo:
+            with cuda_timer() as t:
+                norms = zo_kernels.compute_norms(param_flat, anchor_flat, offsets, sizes)
+                alphas = zo_kernels.apply_constraints(param_flat, anchor_flat, offsets, sizes,
+                                                       constraints, norms)
+            zo_time += t['ms']
         
         with cuda_timer() as t:
             fused_perturb_cuda.fused_perturb(param_flat, seed, -2*cfg.eps)
@@ -1183,9 +1449,10 @@ def benchmark_cuda_perturb_triton_zo(
         
         loss2 = dummy_forward()
         
-        with cuda_timer() as t:
-            zo_kernels.reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
-        zo_time += t['ms']
+        if include_dizo:
+            with cuda_timer() as t:
+                zo_kernels.reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
+            zo_time += t['ms']
         
         projected_grad = (loss1 - loss2) / (2 * cfg.eps)
         
@@ -1197,21 +1464,23 @@ def benchmark_cuda_perturb_triton_zo(
             fused_perturb_cuda.fused_update(param_flat, seed, projected_grad, cfg.lr)
         update_time += t['ms']
         
-        with cuda_timer() as t:
-            zs = zo_kernels.perturb_gamma(constraints, norms, 1.0, cfg.tau, cfg.zo_eps, generate_new=True)
-            zo_kernels.update_gamma(constraints, norms, projected_grad, cfg.step_size, cfg.tau)
-        zo_time += t['ms']
+        if include_dizo:
+            with cuda_timer() as t:
+                zs = zo_kernels.perturb_gamma(constraints, norms, 1.0, cfg.tau, cfg.zo_eps, generate_new=True)
+                zo_kernels.update_gamma(constraints, norms, projected_grad, cfg.step_size, cfg.tau)
+            zo_time += t['ms']
     
     torch.cuda.synchronize()
     # FIX: Use sum of per-step times
     total = (perturb_time + zo_time + update_time) / n_iter
     mem = torch.cuda.max_memory_allocated() / 1024**2
     
+    method_name = "CUDA Perturb + Triton ZO V2" if include_dizo else "CUDA+Triton (MeZO only)"
     return BenchmarkResult(
-        method="CUDA Perturb + Triton ZO V2",
+        method=method_name,
         total_time_ms=total,
         memory_mb=mem,
-        kernel_launches=10,
+        kernel_launches=4 if not include_dizo else 10,
         perturb_ms=perturb_time / n_iter,
         zo_forward_ms=zo_time / n_iter,
         update_ms=update_time / n_iter,
@@ -1229,9 +1498,13 @@ def benchmark_cuda_full(
     sizes: torch.Tensor,
     cfg: TrainingConfig,
     n_iter: int,
+    include_dizo: bool = True,
 ) -> BenchmarkResult:
     """
     Fully CUDA: CUDA Perturb + CUDA ZO-Forward V5.
+    
+    Args:
+        include_dizo: If False, skip DiZO constraint operations (MeZO-only mode).
     """
     if not HAS_CUDA_PERTURB or not HAS_CUDA_ZO_V5:
         missing = []
@@ -1278,12 +1551,13 @@ def benchmark_cuda_full(
         
         loss1 = dummy_forward()
         
-        with cuda_timer() as t:
-            norms = cuda_zo_v5.fused_compute_norms(param_flat, anchor_flat, offsets, sizes)
-            alphas = constraints / (norms + 1e-8)
-            cuda_zo_v5.fused_apply_constraints(param_flat, anchor_flat, offsets, sizes,
-                                                alphas, norms, 1e-8)
-        zo_time += t['ms']
+        if include_dizo:
+            with cuda_timer() as t:
+                norms = cuda_zo_v5.fused_compute_norms(param_flat, anchor_flat, offsets, sizes)
+                alphas = constraints / (norms + 1e-8)
+                cuda_zo_v5.fused_apply_constraints(param_flat, anchor_flat, offsets, sizes,
+                                                    alphas, norms, 1e-8)
+            zo_time += t['ms']
         
         with cuda_timer() as t:
             fused_perturb_cuda.fused_perturb(param_flat, seed, -2*cfg.eps)
@@ -1291,9 +1565,10 @@ def benchmark_cuda_full(
         
         loss2 = dummy_forward()
         
-        with cuda_timer() as t:
-            cuda_zo_v5.fused_reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
-        zo_time += t['ms']
+        if include_dizo:
+            with cuda_timer() as t:
+                cuda_zo_v5.fused_reverse_constraints(param_flat, anchor_flat, offsets, sizes, alphas)
+            zo_time += t['ms']
         
         projected_grad = (loss1 - loss2) / (2 * cfg.eps)
         
@@ -1305,21 +1580,23 @@ def benchmark_cuda_full(
             fused_perturb_cuda.fused_update(param_flat, seed, projected_grad, cfg.lr)
         update_time += t['ms']
         
-        with cuda_timer() as t:
-            cuda_zo_v5.fused_update_gamma(constraints, norms, zs, projected_grad,
-                                           cfg.step_size, cfg.tau)
-        zo_time += t['ms']
+        if include_dizo:
+            with cuda_timer() as t:
+                cuda_zo_v5.fused_update_gamma(constraints, norms, zs, projected_grad,
+                                               cfg.step_size, cfg.tau)
+            zo_time += t['ms']
     
     torch.cuda.synchronize()
     # FIX: Use sum of per-step times
     total = (perturb_time + zo_time + update_time) / n_iter
     mem = torch.cuda.max_memory_allocated() / 1024**2
     
+    method_name = "CUDA Perturb + CUDA ZO V5" if include_dizo else "CUDA Full (MeZO only)"
     return BenchmarkResult(
-        method="CUDA Perturb + CUDA ZO V5",
+        method=method_name,
         total_time_ms=total,
         memory_mb=mem,
-        kernel_launches=10,
+        kernel_launches=4 if not include_dizo else 10,
         perturb_ms=perturb_time / n_iter,
         zo_forward_ms=zo_time / n_iter,
         update_ms=update_time / n_iter,
@@ -1394,6 +1671,29 @@ def create_flat_params_directly(config: Dict, device: torch.device):
 
 def run_benchmarks(args):
     """Run all benchmarks."""
+    # Fail fast with actionable guidance if CUDA cannot be initialized.
+    try:
+        n_visible = torch.cuda.device_count()
+        if n_visible < 1:
+            raise RuntimeError(
+                "torch.cuda.device_count() returned 0 (no visible GPUs)."
+            )
+    except Exception as e:
+        print("=" * 90)
+        print("[ERROR] CUDA initialization failed")
+        print("=" * 90)
+        print(f"Exception: {type(e).__name__}: {e}")
+        print()
+        print("Common fixes:")
+        print("  1) Make sure you're on a GPU node: run `nvidia-smi`.")
+        print("  2) Check you didn't hide GPUs: `echo $CUDA_VISIBLE_DEVICES`.")
+        print("  3) Verify PyTorch CUDA works:")
+        print("     `python -c \"import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available(), torch.cuda.device_count())\"`")
+        print("  4) If you're on a cluster (Slurm), request a GPU allocation (e.g. `srun --gres=gpu:1 ...`).")
+        print("  5) Ensure you're using the intended conda env (check `which python`).")
+        print()
+        raise
+
     print("=" * 90)
     print("INTEGRATED BENCHMARK V2: Full MeZO/DiZO Training Step")
     print("=" * 90)
@@ -1418,6 +1718,7 @@ def run_benchmarks(args):
     print("Kernel Availability:")
     print(f"  Triton:            {'✓' if HAS_TRITON else '✗'}")
     print(f"  Triton Perturb:    {'✓' if HAS_TRITON_PERTURB else '✗'}")
+    print(f"  Triton Philox:     {'✓' if HAS_TRITON_PHILOX else '✗'}")
     print(f"  CUDA Perturb:      {'✓' if HAS_CUDA_PERTURB else '✗'}")
     print(f"  Triton ZO V1:      {'✓' if HAS_TRITON_ZO_V1 else '✗'}")
     print(f"  Triton ZO V2:      {'✓' if HAS_TRITON_ZO_V2 else '✗'}")
@@ -1430,17 +1731,32 @@ def run_benchmarks(args):
     print(f"  Expected params: {config['total_params']:,}")
     print()
     
-    device = torch.device('cuda')
+    device_id = int(getattr(args, 'gpu', 0))
+    if torch.cuda.device_count() <= device_id:
+        raise RuntimeError(
+            f"Requested --gpu {device_id}, but only {torch.cuda.device_count()} CUDA device(s) visible"
+        )
+    torch.cuda.set_device(device_id)
+    device = torch.device(f'cuda:{device_id}')
     
     # Check if user explicitly requested PyTorch baselines
     pytorch_baseline_requested = args.backend in ('pytorch-mezo', 'pytorch-dizo')
+    needs_flat = _backend_needs_flat(args.backend)
     
-    # For very large models (>10B params), use direct allocation for kernel benchmarks
-    is_very_large_model = config['total_params'] > 10_000_000_000
+    # Decide allocation strategy for kernel benchmarks.
+    # The create_param_groups() + flatten_once(torch.cat) path has a ~4x param_size
+    # peak (groups+anchors plus new flat buffers). For large models this can OOM.
+    total_params = int(config['total_params'])
+    param_bytes = total_params * 4  # fp32
+    available_bytes = int(torch.cuda.get_device_properties(device_id).total_memory)
+    peak_bytes_cat_flatten = param_bytes * 4
+    safe_headroom_bytes = int(available_bytes * 0.85)
+    can_fit_cat_flatten = peak_bytes_cat_flatten < safe_headroom_bytes
+    use_direct_allocation = needs_flat and (not can_fit_cat_flatten)
     
     # Estimate memory needed for baseline (param_list + anchor_list = 2x param size)
     baseline_mem_gb = config['total_params'] * 4 * 2 / 1e9
-    available_mem_gb = torch.cuda.get_device_properties(device).total_memory / 1e9
+    available_mem_gb = torch.cuda.get_device_properties(device_id).total_memory / 1e9
     
     # Check if we can fit baseline allocation
     can_fit_baseline = baseline_mem_gb < available_mem_gb * 0.85  # Leave 15% headroom
@@ -1461,47 +1777,66 @@ def run_benchmarks(args):
         is_large_model = n_elements > 2_000_000_000
         
     else:
-        # Determine which allocation strategy to use for kernel benchmarks
-        use_direct_allocation = is_very_large_model
-    
-        # Create flat tensors for kernel-based benchmarks
-        if use_direct_allocation:
-            print("[LARGE MODEL MODE - Direct flat tensor allocation for kernel benchmarks]")
+        # Create flat tensors for kernel-based benchmarks, without creating per-parameter tensors.
+        if not needs_flat:
+            # e.g. pytorch baselines handled above; keep placeholders.
+            param_flat = anchor_flat = offsets = sizes = None
+            n_elements = config['total_params']
+            is_large_model = n_elements > 2_000_000_000
+        elif use_direct_allocation:
+            free_bytes, total_bytes = torch.cuda.mem_get_info(device_id)
+            required_bytes = param_bytes * 2
+            if free_bytes < required_bytes:
+                print("[ERROR] Not enough free VRAM for flat buffers")
+                print(f"  Need (param+anchor) ~{required_bytes / 1024**3:.1f} GiB free")
+                print(f"  Free now: {free_bytes / 1024**3:.1f} GiB (total {total_bytes / 1024**3:.1f} GiB)")
+                print("  Tip: pick a different GPU via --gpu, or free VRAM (e.g., stop other jobs).")
+                return []
+
+            print("[FLAT-ONLY MODE - Direct allocation for kernel benchmarks]")
+            print(f"  Reason: cat-flatten peak ~{peak_bytes_cat_flatten / 1024**3:.1f} GiB would exceed headroom")
+            print(f"  GPU total: {available_bytes / 1024**3:.1f} GiB, headroom target: {safe_headroom_bytes / 1024**3:.1f} GiB")
             print()
-            
-            # Create flat tensors directly without intermediate param_groups
-            param_flat, anchor_flat, offsets, sizes = create_flat_params_directly(config, device)
+            param_flat, anchor_flat, offsets, sizes, _ = create_flat_params_directly(config, device)
             print(f"  Flat buffer: {param_flat.numel():,} elements")
             print()
+            n_elements = param_flat.numel()
+            is_large_model = n_elements > 2_000_000_000
         else:
-            # Standard path: create param_groups then flatten
+            # Standard path: create param_groups then flatten. (OK for smaller models.)
             print("Creating parameters...")
             param_groups, anchor_groups = create_param_groups(config, device)
             print(f"  Groups: {len(param_groups)}, Elements: {sum(p.numel() for p in param_groups):,}")
-            
-            # Flatten ONCE before all benchmarks - returns views that share memory
+
             print("Flattening parameters (ONCE)...")
             param_flat, anchor_flat, offsets, sizes, param_views, anchor_views = flatten_once(param_groups, anchor_groups, device)
             print(f"  Flat buffer: {param_flat.numel():,} elements")
             print()
-            
-            # For models >2B params, delete param_groups immediately  
+
+            # For models >2B params, delete param_groups immediately
             if param_flat.numel() > 2_000_000_000:
                 del param_groups, anchor_groups
                 cleanup_gpu(force_empty=True)
-        
-        n_elements = param_flat.numel()
-        is_large_model = n_elements > 2_000_000_000
-        
-        # === Warmup all kernels BEFORE benchmarks (important for Triton autotuning!) ===
+
+            n_elements = param_flat.numel()
+            is_large_model = n_elements > 2_000_000_000
+    
+    cfg = TrainingConfig(eps=args.eps, lr=args.lr, tau=args.tau, 
+                        zo_eps=args.zo_eps, step_size=args.step_size)
+    
+    results = []
+    
+    # For kernel benchmarks, warmup all kernels (important for Triton autotuning!)
+    # For kernel benchmarks, warmup all kernels (important for Triton autotuning!)
+    if not baseline_only:
         print(f"Warming up all kernels ({args.warmup} iterations)...")
         for _ in range(args.warmup):
             dummy_forward()
         
         # For very large models, warmup on param_flat directly (then restore from anchor_flat)
         # For smaller models, use separate warmup tensor to avoid polluting benchmark data
-        if is_very_large_model:
-            print("  [Very large model: warming up on param_flat directly]")
+        if use_direct_allocation:
+            print("  [Flat-only mode: warming up on param_flat directly]")
             warmup_target = param_flat
         else:
             warmup_target = None  # Will create separate tensor
@@ -1521,6 +1856,22 @@ def run_benchmarks(args):
             if warmup_target is None:
                 del warmup_flat
             print("  Triton runtime-seed perturb autotuning complete")
+
+        # Triton Philox perturb warmup (triggers autotuning ONCE)
+        if HAS_TRITON_PHILOX:
+            if warmup_target is None:
+                warmup_flat = torch.randn(n_elements, device=device, dtype=torch.float32)
+            else:
+                warmup_flat = warmup_target
+            seed_tensor = torch.tensor([42], dtype=torch.int64, device=device)
+            grid = lambda meta: (triton.cdiv(n_elements, meta['BLOCK_SIZE'] * 2),)
+            for _ in range(15):
+                fused_perturb_philox_2x[grid](warmup_flat, seed_tensor, cfg.eps, n_elements)
+                fused_update_philox_2x[grid](warmup_flat, seed_tensor, 0.001, cfg.lr, n_elements)
+            torch.cuda.synchronize()
+            if warmup_target is None:
+                del warmup_flat
+            print("  Triton Philox perturb autotuning complete")
         
         # CUDA perturb warmup
         if HAS_CUDA_PERTURB:
@@ -1537,7 +1888,7 @@ def run_benchmarks(args):
             print("  CUDA perturb warmup complete")
         
         # For very large models, restore param_flat from anchor_flat after warmup
-        if is_very_large_model:
+        if use_direct_allocation:
             param_flat.copy_(anchor_flat)
             torch.cuda.synchronize()
             print("  Restored param_flat from anchor_flat")
@@ -1548,9 +1899,6 @@ def run_benchmarks(args):
         # Baseline-only mode - no kernel warmup needed
         print("[Baseline-only mode: skipping kernel warmup]")
         print()
-    
-    cleanup_gpu()
-    print()
     
     # === Backend filtering based on --backend argument ===
     backend = args.backend
@@ -1564,6 +1912,9 @@ def run_benchmarks(args):
         if param_flat is not None and anchor_flat is not None:
             param_flat.copy_(anchor_flat)
             torch.cuda.synchronize()
+    
+    # Determine if user explicitly requested PyTorch baselines
+    pytorch_requested = backend in ('pytorch-mezo', 'pytorch-dizo')
     
     # Check if we can run PyTorch baselines (need enough memory for separate param_list)
     can_run_baseline = can_fit_baseline
@@ -1671,11 +2022,24 @@ def run_benchmarks(args):
         reset_params()
         cleanup_gpu(force_empty=is_large_model)
     
-    # 8. Triton Perturb + Triton ZO V2 (multi-block) - with DiZO
+    # 8. Triton Perturb + Triton ZO V2 (multi-block)
     if run_all or backend == 'triton-zo-v2':
         print("Benchmarking: Triton Perturb + Triton ZO V2...")
         reset_params()
-        r = benchmark_triton_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=True)
+        r = benchmark_triton_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter)
+        results.append(r)
+        if r.total_time_ms > 0:
+            print(f"  → {r.total_time_ms:.2f} ms")
+        else:
+            print(f"  → {r.method}")
+        reset_params()
+        cleanup_gpu(force_empty=is_large_model)
+
+    # 8b. Triton Philox Perturb + Triton ZO V2
+    if run_all or backend == 'triton-philox-zo-v2':
+        print("Benchmarking: Triton Philox Perturb + Triton ZO V2...")
+        reset_params()
+        r = benchmark_triton_philox_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=True)
         results.append(r)
         if r.total_time_ms > 0:
             print(f"  → {r.total_time_ms:.2f} ms")
@@ -1684,9 +2048,35 @@ def run_benchmarks(args):
         reset_params()
         cleanup_gpu(force_empty=is_large_model)
     
-    # 8b. Triton V2 MeZO-only (no DiZO constraints)
+    # 9. CUDA Perturb + Triton ZO V2
+    if run_all or backend == 'cuda-triton':
+        print("Benchmarking: CUDA Perturb + Triton ZO V2...")
+        reset_params()
+        r = benchmark_cuda_perturb_triton_zo(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter)
+        results.append(r)
+        if r.total_time_ms > 0:
+            print(f"  → {r.total_time_ms:.2f} ms")
+        else:
+            print(f"  → {r.method}")
+        reset_params()
+        cleanup_gpu(force_empty=is_large_model)
+    
+    # 10. CUDA Perturb + CUDA ZO V5
+    if run_all or backend == 'cuda-full':
+        print("Benchmarking: CUDA Perturb + CUDA ZO V5...")
+        reset_params()
+        r = benchmark_cuda_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter)
+        results.append(r)
+        if r.total_time_ms > 0:
+            print(f"  → {r.total_time_ms:.2f} ms")
+        else:
+            print(f"  → {r.method}")
+        reset_params()
+        cleanup_gpu(force_empty=is_large_model)
+    
+    # 11. Triton V2 MeZO-only (no DiZO constraints) - optimized kernels, no constraint ops
     if run_all or backend == 'triton-mezo':
-        print("Benchmarking: Triton V2 (MeZO only, no constraints)...")
+        print("Benchmarking: Triton V2 (MeZO only, no DiZO constraints)...")
         reset_params()
         r = benchmark_triton_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=False)
         results.append(r)
@@ -1696,12 +2086,12 @@ def run_benchmarks(args):
             print(f"  → {r.method}")
         reset_params()
         cleanup_gpu(force_empty=is_large_model)
-    
-    # 9. CUDA Perturb + Triton ZO V2 - with DiZO
-    if run_all or backend == 'cuda-triton':
-        print("Benchmarking: CUDA Perturb + Triton ZO V2...")
+
+    # 11b. Triton Philox MeZO-only (no DiZO constraints)
+    if run_all or backend == 'triton-philox-mezo':
+        print("Benchmarking: Triton Philox (MeZO only, no DiZO constraints)...")
         reset_params()
-        r = benchmark_cuda_perturb_triton_zo(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=True)
+        r = benchmark_triton_philox_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=False)
         results.append(r)
         if r.total_time_ms > 0:
             print(f"  → {r.total_time_ms:.2f} ms")
@@ -1710,22 +2100,9 @@ def run_benchmarks(args):
         reset_params()
         cleanup_gpu(force_empty=is_large_model)
     
-    # 10. CUDA Perturb + CUDA ZO V5 - with DiZO
-    if run_all or backend == 'cuda-full':
-        print("Benchmarking: CUDA Perturb + CUDA ZO V5...")
-        reset_params()
-        r = benchmark_cuda_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=True)
-        results.append(r)
-        if r.total_time_ms > 0:
-            print(f"  → {r.total_time_ms:.2f} ms")
-        else:
-            print(f"  → {r.method}")
-        reset_params()
-        cleanup_gpu(force_empty=is_large_model)
-    
-    # 10b. CUDA Full MeZO-only (no DiZO constraints)
+    # 12. CUDA Full MeZO-only (no DiZO constraints) - optimized kernels, no constraint ops
     if run_all or backend == 'cuda-mezo':
-        print("Benchmarking: CUDA Full (MeZO only, no constraints)...")
+        print("Benchmarking: CUDA Full (MeZO only, no DiZO constraints)...")
         reset_params()
         r = benchmark_cuda_full(param_flat, anchor_flat, offsets, sizes, cfg, args.n_iter, include_dizo=False)
         results.append(r)
@@ -1847,14 +2224,17 @@ Available backends:
   triton-perturb - Triton Perturb only (basic MeZO)
   cuda-mezo      - CUDA Full kernels but MeZO-only (no constraints)
   triton-mezo    - Triton V2 kernels but MeZO-only (no constraints)
+    triton-philox-mezo - Triton Philox perturb/update (MeZO-only)
   
   --- Full DiZO (with constraints) ---
   cuda-full      - CUDA Perturb + CUDA ZO V5
   cuda-triton    - CUDA Perturb + Triton ZO V2
   triton-zo-v2   - Triton Perturb + Triton ZO V2
+    triton-philox-zo-v2 - Triton Philox perturb/update + Triton ZO V2
 """
     )
     parser.add_argument('--model', type=str, default='opt-350m', choices=list(MODEL_CONFIGS.keys()))
+    parser.add_argument('--gpu', type=int, default=0, help='CUDA device index to run on (0-based, within visible devices)')
     parser.add_argument('--n_iter', type=int, default=20)
     parser.add_argument('--warmup', type=int, default=5)
     parser.add_argument('--eps', type=float, default=1e-3)
@@ -1866,7 +2246,8 @@ Available backends:
     parser.add_argument('--backend', type=str, default='all',
                         choices=['all', 'pytorch-mezo', 'pytorch-dizo',
                                  'cuda-perturb', 'cuda-full', 'cuda-triton', 'cuda-mezo',
-                                 'triton-perturb', 'triton-zo-v2', 'triton-mezo'],
+                                 'triton-perturb', 'triton-zo-v2', 'triton-mezo',
+                                 'triton-philox-zo-v2', 'triton-philox-mezo'],
                         help='Specific backend to benchmark (for memory efficiency on large models)')
     parser.add_argument('--output', action='store_true')
     parser.add_argument('--all', action='store_true', help='Run benchmarks for all model sizes')

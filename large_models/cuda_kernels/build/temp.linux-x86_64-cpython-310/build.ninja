@@ -1,0 +1,37 @@
+ninja_required_version = 1.3
+cxx = /home/luo00466/miniconda3/envs/py310/bin/x86_64-conda-linux-gnu-c++
+nvcc = /home/luo00466/miniconda3/envs/py310/bin/nvcc
+
+cflags = -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /home/luo00466/miniconda3/envs/py310/include -I/home/luo00466/miniconda3/envs/py310/targets/x86_64-linux/include -L/home/luo00466/miniconda3/envs/py310/targets/x86_64-linux/lib -L/home/luo00466/miniconda3/envs/py310/targets/x86_64-linux/lib/stubs -DNDEBUG -D_FORTIFY_SOURCE=2 -O2 -isystem /home/luo00466/miniconda3/envs/py310/include -I/home/luo00466/miniconda3/envs/py310/targets/x86_64-linux/include -L/home/luo00466/miniconda3/envs/py310/targets/x86_64-linux/lib -L/home/luo00466/miniconda3/envs/py310/targets/x86_64-linux/lib/stubs -fPIC -I/home/luo00466/miniconda3/envs/py310/lib/python3.10/site-packages/torch/include -I/home/luo00466/miniconda3/envs/py310/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/home/luo00466/miniconda3/envs/py310/include -I/home/luo00466/miniconda3/envs/py310/include/python3.10 -c
+post_cflags = -O3 -std=c++17 -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=single_gpu_opt_cuda
+cuda_cflags = -I/home/luo00466/miniconda3/envs/py310/lib/python3.10/site-packages/torch/include -I/home/luo00466/miniconda3/envs/py310/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/home/luo00466/miniconda3/envs/py310/include -I/home/luo00466/miniconda3/envs/py310/include/python3.10 -c
+cuda_post_cflags = -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -arch=sm_90 -DUSE_TORCH --use_fast_math -lineinfo --ptxas-options=-v -Xcompiler -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=single_gpu_opt_cuda -ccbin /home/luo00466/miniconda3/envs/py310/bin/x86_64-conda-linux-gnu-cc -std=c++17
+cuda_dlink_post_cflags = 
+sycl_dlink_post_cflags = 
+ldflags = 
+
+rule compile
+  command = $cxx -MMD -MF $out.d $cflags -c $in -o $out $post_cflags
+  depfile = $out.d
+  deps = gcc
+
+rule cuda_compile
+  depfile = $out.d
+  deps = gcc
+  command = $nvcc --generate-dependencies-with-compile --dependency-output $out.d $cuda_cflags -c $in -o $out $cuda_post_cflags
+
+
+
+
+
+
+
+build /home/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/build/temp.linux-x86_64-cpython-310/single_gpu_optimizations.o: cuda_compile /home/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/single_gpu_optimizations.cu
+
+
+
+
+
+
+
+

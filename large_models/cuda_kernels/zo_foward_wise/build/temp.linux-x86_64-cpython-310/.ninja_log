@@ -1,5 +1,2 @@
 # ninja log v7
-37	39617	1766075121078342827	/mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/zo_foward_wise/build/temp.linux-x86_64-cpython-310/dizo_fused_kernels.o	ff5a3bb3a6e9488e
-1080	53506	1766962312759323856	/mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/zo_foward_wise/build/temp.linux-x86_64-cpython-310/dizo_fused_kernels.o	31ded935755d0147
-3	158548	1766962421800160072	/mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/zo_foward_wise/build/temp.linux-x86_64-cpython-310/dizo_fused_kernels_v2.o	2fa5b1358af61cf4
-2	40991	1766962677114776136	/mnt/data1/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/zo_foward_wise/build/temp.linux-x86_64-cpython-310/dizo_fused_kernels_v5.o	361b26aebfa99af0
+0	37017	1767673503656111655	/home/luo00466/DiZO_old/DiZO/large_models/cuda_kernels/zo_foward_wise/build/temp.linux-x86_64-cpython-310/dizo_fused_kernels_v5.o	e255cf40db07ca92
