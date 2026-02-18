@@ -1,0 +1,12 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-12T11:21:14.175380
+# Method,dizo
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,constraints,A,Per-tensor constraints (apply+reverse),27.428,0.026,27.452,0.085,1.00
+opt-350m,388,331196416,constraints,B,Flat buf + PyTorch (loop w/ slices),36.807,0.692,36.834,0.698,0.75
+opt-350m,388,331196416,constraints,C,Flat buf + Triton V2 fused (3 launches),3.638,0.026,3.656,0.027,7.54
+opt-2.7b,516,2651596800,constraints,A,Per-tensor constraints (apply+reverse),162.468,0.035,162.512,0.039,1.00
+opt-2.7b,516,2651596800,constraints,B,Flat buf + PyTorch (loop w/ slices),167.193,0.047,167.228,0.047,0.97
+opt-6.7b,516,6658473984,constraints,A,Per-tensor constraints (apply+reverse),411.914,0.060,411.966,0.066,1.00
+opt-6.7b,516,6658473984,constraints,B,Flat buf + PyTorch (loop w/ slices),412.964,0.085,413.014,0.091,1.00

@@ -1,0 +1,25 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-12T02:02:44.297798
+# Mode,rng
+
+model,n_params,total_elements,approach,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,per_tensor_rng_only,2.508,0.007,2.518,0.007,1.00
+opt-350m,388,331196416,per_tensor_cuda_fused,2.523,0.002,2.531,0.002,0.99
+opt-350m,388,331196416,per_tensor_triton_fused,6.710,0.507,6.721,0.509,0.37
+opt-350m,388,331196416,flat_pytorch_rng_only,0.510,0.003,0.518,0.003,4.91
+opt-350m,388,331196416,fused_kernel,1.813,0.002,1.820,0.002,1.38
+opt-2.7b,516,2651596800,per_tensor_rng_only,4.842,0.003,4.850,0.003,1.00
+opt-2.7b,516,2651596800,per_tensor_cuda_fused,15.091,0.012,15.103,0.012,0.32
+opt-2.7b,516,2651596800,per_tensor_triton_fused,15.020,0.017,15.031,0.016,0.32
+opt-2.7b,516,2651596800,flat_pytorch_rng_only,3.810,0.008,3.819,0.008,1.27
+opt-2.7b,516,2651596800,fused_kernel,14.528,0.018,14.541,0.017,0.33
+opt-6.7b,516,6658473984,per_tensor_rng_only,9.931,0.012,9.942,0.011,1.00
+opt-6.7b,516,6658473984,per_tensor_cuda_fused,36.858,0.010,36.875,0.010,0.27
+opt-6.7b,516,6658473984,per_tensor_triton_fused,36.865,0.014,36.881,0.014,0.27
+opt-6.7b,516,6658473984,flat_pytorch_rng_only,9.469,0.017,9.480,0.018,1.05
+opt-6.7b,516,6658473984,fused_kernel,36.510,0.026,36.526,0.026,0.27
+opt-13b,644,12853473280,per_tensor_rng_only,18.022,0.014,18.034,0.014,1.00
+opt-13b,644,12853473280,per_tensor_cuda_fused,70.876,0.020,70.898,0.020,0.25
+opt-13b,644,12853473280,per_tensor_triton_fused,71.076,0.067,71.100,0.067,0.25
+opt-13b,644,12853473280,flat_pytorch_rng_only,18.242,0.079,18.257,0.079,0.99
+opt-13b,644,12853473280,fused_kernel,70.404,0.031,70.425,0.031,0.26

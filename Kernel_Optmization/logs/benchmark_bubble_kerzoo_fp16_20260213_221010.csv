@@ -1,0 +1,14 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-13T22:10:10.058681
+# Method,kerzoo
+# Dtype,fp16
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,perturb,A,Per-tensor KerZOO perturb (baseline),21.492,0.110,21.541,0.107,1.00
+opt-350m,388,331196416,perturb,D,Per-tensor + Triton fused (N launches),4.496,83.176,4.522,83.177,4.78
+opt-350m,388,331196416,perturb,B,Flat buf + PyTorch (expand k + flat ops),8.040,0.021,8.061,0.025,2.67
+opt-350m,388,331196416,perturb,C,Flat buf + Triton fused (1 launch),4.199,84.234,4.233,84.233,5.12
+opt-350m,388,331196416,update,A,Per-tensor KerZOO update (baseline),59.160,0.179,59.189,0.188,1.00
+opt-350m,388,331196416,update,D,Per-tensor + Triton fused (3N+N launches),26.698,82.405,26.727,82.403,2.22
+opt-350m,388,331196416,update,B,Flat buf + PyTorch (expand + flat ops),18.642,0.015,18.661,0.018,3.17
+opt-350m,388,331196416,update,C,Flat buf + Triton fused (3+1 launches),12.632,83.129,12.665,83.128,4.68

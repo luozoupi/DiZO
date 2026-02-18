@@ -1,0 +1,33 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-12T02:01:46.954584
+# Mode,perturb
+
+model,n_params,total_elements,approach,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,per_tensor_rng_only,2.477,0.005,2.487,0.005,3.47
+opt-350m,388,331196416,per_tensor_add_only,2.252,0.006,2.259,0.006,3.82
+opt-350m,388,331196416,per_tensor_full,8.601,0.021,8.615,0.021,1.00
+opt-350m,388,331196416,per_tensor_cuda_fused,2.525,0.003,2.533,0.003,3.41
+opt-350m,388,331196416,per_tensor_triton_fused,6.446,0.571,6.458,0.572,1.33
+opt-350m,388,331196416,flat_pytorch,1.853,0.003,1.861,0.003,4.64
+opt-350m,388,331196416,fused_kernel,1.811,0.002,1.819,0.002,4.75
+opt-2.7b,516,2651596800,per_tensor_rng_only,4.845,0.004,4.853,0.004,3.95
+opt-2.7b,516,2651596800,per_tensor_add_only,11.871,0.015,11.883,0.022,1.61
+opt-2.7b,516,2651596800,per_tensor_full,19.130,0.048,19.142,0.048,1.00
+opt-2.7b,516,2651596800,per_tensor_cuda_fused,15.122,0.017,15.134,0.026,1.27
+opt-2.7b,516,2651596800,per_tensor_triton_fused,14.995,0.565,15.006,0.565,1.28
+opt-2.7b,516,2651596800,flat_pytorch,14.566,0.031,14.580,0.030,1.31
+opt-2.7b,516,2651596800,fused_kernel,14.531,0.024,14.544,0.024,1.32
+opt-6.7b,516,6658473984,per_tensor_rng_only,9.924,0.006,9.934,0.006,6.22
+opt-6.7b,516,6658473984,per_tensor_add_only,27.962,0.013,27.977,0.013,2.21
+opt-6.7b,516,6658473984,per_tensor_full,61.689,0.067,61.706,0.070,1.00
+opt-6.7b,516,6658473984,per_tensor_cuda_fused,36.868,0.016,36.885,0.025,1.67
+opt-6.7b,516,6658473984,per_tensor_triton_fused,36.843,0.015,36.860,0.016,1.67
+opt-6.7b,516,6658473984,flat_pytorch,36.424,0.025,36.443,0.026,1.69
+opt-6.7b,516,6658473984,fused_kernel,36.471,0.029,36.488,0.029,1.69
+opt-13b,644,12853473280,per_tensor_rng_only,18.016,0.010,18.030,0.010,6.78
+opt-13b,644,12853473280,per_tensor_add_only,52.800,0.012,52.819,0.012,2.31
+opt-13b,644,12853473280,per_tensor_full,122.076,0.044,122.099,0.044,1.00
+opt-13b,644,12853473280,per_tensor_cuda_fused,70.883,0.014,70.907,0.016,1.72
+opt-13b,644,12853473280,per_tensor_triton_fused,71.143,0.073,71.172,0.075,1.72
+opt-13b,644,12853473280,flat_pytorch,70.261,0.078,70.285,0.083,1.74
+opt-13b,644,12853473280,fused_kernel,70.431,0.036,70.454,0.036,1.73
