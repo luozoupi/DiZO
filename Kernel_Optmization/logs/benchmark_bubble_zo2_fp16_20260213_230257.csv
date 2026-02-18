@@ -1,0 +1,36 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-13T23:02:57.794508
+# Method,zo2
+# Dtype,fp16
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,dual_perturb,A,Per-tensor dual perturb (baseline),10.991,0.652,11.011,0.659,1.00
+opt-350m,388,331196416,dual_perturb,D,Per-tensor + Triton fused (N launches),3.809,0.025,3.824,0.027,2.89
+opt-350m,388,331196416,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),4.276,0.030,4.294,0.154,2.57
+opt-350m,388,331196416,dual_perturb,C,Flat buf + Triton fused (1 launch),1.410,0.009,1.426,0.009,7.79
+opt-350m,388,331196416,dual_forward,A,Per-tensor dual-forward (baseline),22.620,0.083,22.647,0.083,1.00
+opt-350m,388,331196416,dual_forward,D,Per-tensor + Triton combined (N launches),4.342,0.017,4.355,0.020,5.21
+opt-350m,388,331196416,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),8.430,0.057,8.451,0.063,2.68
+opt-350m,388,331196416,dual_forward,C,Flat buf + Triton combined (1 launch),2.381,0.003,2.398,0.006,9.50
+opt-2.7b,516,2651596800,dual_perturb,A,Per-tensor dual perturb (baseline),35.531,0.060,35.556,0.062,1.00
+opt-2.7b,516,2651596800,dual_perturb,D,Per-tensor + Triton fused (N launches),12.666,0.010,12.688,0.014,2.81
+opt-2.7b,516,2651596800,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),33.487,0.085,33.524,0.090,1.06
+opt-2.7b,516,2651596800,dual_perturb,C,Flat buf + Triton fused (1 launch),11.080,0.624,11.102,0.629,3.21
+opt-2.7b,516,2651596800,dual_forward,A,Per-tensor dual-forward (baseline),69.970,0.082,70.004,0.082,1.00
+opt-2.7b,516,2651596800,dual_forward,D,Per-tensor + Triton combined (N launches),21.377,0.137,21.402,0.138,3.27
+opt-2.7b,516,2651596800,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),66.844,0.090,66.889,0.103,1.05
+opt-2.7b,516,2651596800,dual_forward,C,Flat buf + Triton combined (1 launch),18.933,121.027,18.960,121.028,3.70
+opt-6.7b,516,6658473984,dual_perturb,A,Per-tensor dual perturb (baseline),105.244,0.042,105.283,0.041,1.00
+opt-6.7b,516,6658473984,dual_perturb,D,Per-tensor + Triton fused (N launches),29.174,0.171,29.205,0.169,3.61
+opt-6.7b,516,6658473984,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),83.908,0.067,83.954,0.070,1.25
+opt-6.7b,516,6658473984,dual_perturb,C,Flat buf + Triton fused (1 launch),27.796,1.527,27.825,1.530,3.79
+opt-6.7b,516,6658473984,dual_forward,A,Per-tensor dual-forward (baseline),206.781,0.069,206.820,0.075,1.00
+opt-6.7b,516,6658473984,dual_forward,D,Per-tensor + Triton combined (N launches),50.156,0.056,50.196,0.059,4.12
+opt-6.7b,516,6658473984,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),167.750,0.201,167.798,0.202,1.23
+opt-6.7b,516,6658473984,dual_forward,C,Flat buf + Triton combined (1 launch),47.500,0.040,47.540,0.040,4.35
+opt-13b,644,12853473280,dual_perturb,A,Per-tensor dual perturb (baseline),212.478,0.086,212.528,0.086,1.00
+opt-13b,644,12853473280,dual_perturb,D,Per-tensor + Triton fused (N launches),55.244,0.024,55.283,0.029,3.85
+opt-13b,644,12853473280,dual_perturb,C,Flat buf + Triton fused (1 launch),53.593,0.053,53.636,0.054,3.96
+opt-13b,644,12853473280,dual_forward,A,Per-tensor dual-forward (baseline),424.347,0.105,424.396,0.119,1.00
+opt-13b,644,12853473280,dual_forward,D,Per-tensor + Triton combined (N launches),94.790,0.073,94.836,0.076,4.48
+opt-13b,644,12853473280,dual_forward,C,Flat buf + Triton combined (1 launch),91.604,0.049,91.652,0.054,4.63

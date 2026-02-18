@@ -1,0 +1,17 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-12T11:20:25.278300
+# Method,hizoo
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,perturb,A,Per-tensor HiZOO perturb (baseline),10.482,0.026,10.500,0.033,1.00
+opt-350m,388,331196416,perturb,B,Flat buf + PyTorch (randn+rsqrt+add),10.049,0.034,10.072,0.038,1.04
+opt-350m,388,331196416,perturb,C,Flat buf + Triton fused (1 launch),2.726,0.254,2.740,0.254,3.85
+opt-350m,388,331196416,update_restore,A,Per-tensor HiZOO update-restore (baseline),35.327,0.665,35.355,0.671,1.00
+opt-350m,388,331196416,update_restore,B,Flat buf + PyTorch (multiple ops),39.968,0.036,40.005,0.040,0.88
+opt-350m,388,331196416,update_restore,C,Flat buf + Triton fused (1 launch),3.674,0.274,3.689,0.274,9.62
+opt-2.7b,516,2651596800,perturb,A,Per-tensor HiZOO perturb (baseline),73.038,0.066,73.072,0.071,1.00
+opt-2.7b,516,2651596800,perturb,B,Flat buf + PyTorch (randn+rsqrt+add),79.741,0.094,79.793,0.102,0.92
+opt-2.7b,516,2651596800,update_restore,A,Per-tensor HiZOO update-restore (baseline),283.038,0.079,283.078,0.079,1.00
+opt-2.7b,516,2651596800,update_restore,B,Flat buf + PyTorch (multiple ops),318.696,0.105,318.751,0.104,0.89
+opt-6.7b,516,6658473984,perturb,A,Per-tensor HiZOO perturb (baseline),187.910,0.063,187.961,0.062,1.00
+opt-6.7b,516,6658473984,update_restore,A,Per-tensor HiZOO update-restore (baseline),768.651,0.095,768.707,0.096,1.00

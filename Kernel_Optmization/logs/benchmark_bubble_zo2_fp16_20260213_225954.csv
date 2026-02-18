@@ -1,0 +1,14 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-13T22:59:54.786545
+# Method,zo2
+# Dtype,fp16
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,dual_perturb,A,Per-tensor dual perturb (baseline),10.887,0.011,10.908,0.027,1.00
+opt-350m,388,331196416,dual_perturb,D,Per-tensor + Triton fused (N launches),3.952,0.302,3.993,0.301,2.76
+opt-350m,388,331196416,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),4.283,0.016,4.301,0.022,2.54
+opt-350m,388,331196416,dual_perturb,C,Flat buf + Triton fused (1 launch),1.414,0.002,1.428,0.007,7.70
+opt-350m,388,331196416,dual_forward,A,Per-tensor dual-forward (baseline),22.546,0.040,22.573,0.042,1.00
+opt-350m,388,331196416,dual_forward,D,Per-tensor + Triton combined (N launches),4.455,0.749,4.489,0.761,5.06
+opt-350m,388,331196416,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),8.432,0.012,8.454,0.019,2.67
+opt-350m,388,331196416,dual_forward,C,Flat buf + Triton combined (1 launch),2.385,0.002,2.400,0.008,9.45

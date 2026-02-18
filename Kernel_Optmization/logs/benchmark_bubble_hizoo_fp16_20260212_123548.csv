@@ -1,0 +1,35 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-12T12:35:48.517858
+# Method,hizoo
+# Dtype,fp16
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,perturb,A,Per-tensor HiZOO perturb (baseline),9.049,0.052,9.068,0.054,1.00
+opt-350m,388,331196416,perturb,D,Per-tensor + Triton fused (N launches),4.870,0.083,4.885,0.083,1.86
+opt-350m,388,331196416,perturb,B,Flat buf + PyTorch (randn+rsqrt+add),5.181,0.014,5.200,0.017,1.75
+opt-350m,388,331196416,perturb,C,Flat buf + Triton fused (1 launch),1.358,0.258,1.373,0.258,6.66
+opt-350m,388,331196416,update_restore,A,Per-tensor HiZOO update-restore (baseline),36.729,1.844,36.757,1.847,1.00
+opt-350m,388,331196416,update_restore,D,Per-tensor + Triton fused (N launches),5.900,0.086,5.917,0.086,6.23
+opt-350m,388,331196416,update_restore,B,Flat buf + PyTorch (multiple ops),20.252,0.031,20.280,0.036,1.81
+opt-350m,388,331196416,update_restore,C,Flat buf + Triton fused (1 launch),1.841,0.290,1.856,0.289,19.96
+opt-2.7b,516,2651596800,perturb,A,Per-tensor HiZOO perturb (baseline),33.984,0.040,34.011,0.040,1.00
+opt-2.7b,516,2651596800,perturb,D,Per-tensor + Triton fused (N launches),12.770,44.459,12.790,44.458,2.66
+opt-2.7b,516,2651596800,perturb,B,Flat buf + PyTorch (randn+rsqrt+add),40.861,0.095,40.901,0.100,0.83
+opt-2.7b,516,2651596800,perturb,C,Flat buf + Triton fused (1 launch),10.660,0.413,10.678,0.415,3.19
+opt-2.7b,516,2651596800,update_restore,A,Per-tensor HiZOO update-restore (baseline),119.468,0.092,119.500,0.097,1.00
+opt-2.7b,516,2651596800,update_restore,D,Per-tensor + Triton fused (N launches),15.644,47.543,15.665,47.543,7.64
+opt-2.7b,516,2651596800,update_restore,B,Flat buf + PyTorch (multiple ops),161.105,0.134,161.161,0.142,0.74
+opt-2.7b,516,2651596800,update_restore,C,Flat buf + Triton fused (1 launch),14.741,0.973,14.766,0.977,8.10
+opt-6.7b,516,6658473984,perturb,A,Per-tensor HiZOO perturb (baseline),93.669,0.034,93.710,0.036,1.00
+opt-6.7b,516,6658473984,perturb,D,Per-tensor + Triton fused (N launches),28.961,0.014,28.990,0.018,3.23
+opt-6.7b,516,6658473984,perturb,B,Flat buf + PyTorch (randn+rsqrt+add),102.355,0.116,102.412,0.122,0.92
+opt-6.7b,516,6658473984,perturb,C,Flat buf + Triton fused (1 launch),27.139,1.079,27.170,1.084,3.45
+opt-6.7b,516,6658473984,update_restore,A,Per-tensor HiZOO update-restore (baseline),357.661,0.115,357.705,0.114,1.00
+opt-6.7b,516,6658473984,update_restore,D,Per-tensor + Triton fused (N launches),37.634,0.019,37.665,0.024,9.50
+opt-6.7b,516,6658473984,update_restore,C,Flat buf + Triton fused (1 launch),36.739,0.141,36.786,0.140,9.74
+opt-13b,644,12853473280,perturb,A,Per-tensor HiZOO perturb (baseline),185.298,0.049,185.343,0.049,1.00
+opt-13b,644,12853473280,perturb,D,Per-tensor + Triton fused (N launches),54.365,0.283,54.408,0.281,3.41
+opt-13b,644,12853473280,perturb,C,Flat buf + Triton fused (1 launch),52.380,0.016,52.420,0.020,3.54
+opt-13b,644,12853473280,update_restore,A,Per-tensor HiZOO update-restore (baseline),736.453,4.521,736.509,4.521,1.00
+opt-13b,644,12853473280,update_restore,D,Per-tensor + Triton fused (N launches),72.043,0.017,72.087,0.020,10.22
+opt-13b,644,12853473280,update_restore,C,Flat buf + Triton fused (1 launch),70.946,0.303,70.988,0.303,10.38

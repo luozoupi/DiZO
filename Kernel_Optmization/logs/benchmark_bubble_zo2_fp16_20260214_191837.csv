@@ -1,0 +1,52 @@
+# GPU,NVIDIA RTX PRO 6000 Blackwell Server Edition
+# Date,2026-02-14T19:18:37.810664
+# Method,zo2
+# Dtype,fp16
+
+model,n_params,total_elements,operation,approach_tag,approach_label,stream_median_ms,stream_std_ms,wall_median_ms,wall_std_ms,speedup_vs_baseline
+opt-350m,388,331196416,dual_perturb,A,Per-tensor dual perturb (baseline),10.917,0.191,10.936,0.192,1.00
+opt-350m,388,331196416,dual_perturb,D,Per-tensor + Triton fused (N launches),3.894,0.033,3.908,0.035,2.80
+opt-350m,388,331196416,dual_perturb,F,Per-tensor + CUDA fused (N launches),3.169,0.005,3.184,0.007,3.45
+opt-350m,388,331196416,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),4.276,0.013,4.294,0.017,2.55
+opt-350m,388,331196416,dual_perturb,C,Flat buf + Triton fused (1 launch),1.392,0.004,1.407,0.006,7.84
+opt-350m,388,331196416,dual_perturb,E,Flat buf + CUDA fused (1 launch),2.168,0.002,2.183,0.006,5.04
+opt-350m,388,331196416,dual_forward,A,Per-tensor dual-forward (baseline),22.604,0.033,22.629,0.034,1.00
+opt-350m,388,331196416,dual_forward,D,Per-tensor + Triton combined (N launches),4.396,0.018,4.409,0.022,5.14
+opt-350m,388,331196416,dual_forward,F,Per-tensor + CUDA combined (N launches),5.709,0.003,5.727,0.007,3.96
+opt-350m,388,331196416,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),8.427,0.018,8.448,0.022,2.68
+opt-350m,388,331196416,dual_forward,C,Flat buf + Triton combined (1 launch),2.381,0.003,2.398,0.006,9.49
+opt-350m,388,331196416,dual_forward,E,Flat buf + CUDA combined (1 launch),4.320,0.001,4.338,0.006,5.23
+opt-2.7b,516,2651596800,dual_perturb,A,Per-tensor dual perturb (baseline),35.559,0.034,35.587,0.035,1.00
+opt-2.7b,516,2651596800,dual_perturb,D,Per-tensor + Triton fused (N launches),12.668,0.010,12.689,0.015,2.81
+opt-2.7b,516,2651596800,dual_perturb,F,Per-tensor + CUDA fused (N launches),18.543,0.014,18.571,0.017,1.92
+opt-2.7b,516,2651596800,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),33.508,0.060,33.545,0.065,1.06
+opt-2.7b,516,2651596800,dual_perturb,C,Flat buf + Triton fused (1 launch),11.067,0.639,11.090,0.643,3.21
+opt-2.7b,516,2651596800,dual_perturb,E,Flat buf + CUDA fused (1 launch),17.298,0.009,17.324,0.019,2.06
+opt-2.7b,516,2651596800,dual_forward,A,Per-tensor dual-forward (baseline),70.001,0.049,70.031,0.048,1.00
+opt-2.7b,516,2651596800,dual_forward,D,Per-tensor + Triton combined (N launches),21.547,0.096,21.572,0.095,3.25
+opt-2.7b,516,2651596800,dual_forward,F,Per-tensor + CUDA combined (N launches),36.397,0.010,36.432,0.011,1.92
+opt-2.7b,516,2651596800,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),66.860,0.039,66.910,0.039,1.05
+opt-2.7b,516,2651596800,dual_forward,C,Flat buf + Triton combined (1 launch),18.936,0.534,18.963,0.533,3.70
+opt-2.7b,516,2651596800,dual_forward,E,Flat buf + CUDA combined (1 launch),34.523,0.003,34.557,0.011,2.03
+opt-6.7b,516,6658473984,dual_perturb,A,Per-tensor dual perturb (baseline),105.221,0.037,105.259,0.037,1.00
+opt-6.7b,516,6658473984,dual_perturb,D,Per-tensor + Triton fused (N launches),29.151,0.116,29.181,0.118,3.61
+opt-6.7b,516,6658473984,dual_perturb,F,Per-tensor + CUDA fused (N launches),44.874,0.031,44.913,0.031,2.34
+opt-6.7b,516,6658473984,dual_perturb,B,Flat buf + PyTorch (randn + add/sub),83.931,0.065,83.993,0.066,1.25
+opt-6.7b,516,6658473984,dual_perturb,C,Flat buf + Triton fused (1 launch),27.787,1.517,27.818,1.520,3.79
+opt-6.7b,516,6658473984,dual_perturb,E,Flat buf + CUDA fused (1 launch),43.469,0.022,43.506,0.026,2.42
+opt-6.7b,516,6658473984,dual_forward,A,Per-tensor dual-forward (baseline),207.235,0.056,207.280,0.057,1.00
+opt-6.7b,516,6658473984,dual_forward,D,Per-tensor + Triton combined (N launches),50.154,0.067,50.192,0.070,4.13
+opt-6.7b,516,6658473984,dual_forward,F,Per-tensor + CUDA combined (N launches),88.856,0.063,88.907,0.067,2.33
+opt-6.7b,516,6658473984,dual_forward,B,Flat buf + PyTorch (update + randn + add/sub),167.771,0.077,167.825,0.083,1.24
+opt-6.7b,516,6658473984,dual_forward,C,Flat buf + Triton combined (1 launch),47.508,0.029,47.547,0.030,4.36
+opt-6.7b,516,6658473984,dual_forward,E,Flat buf + CUDA combined (1 launch),86.827,0.062,86.876,0.062,2.39
+opt-13b,644,12853473280,dual_perturb,A,Per-tensor dual perturb (baseline),212.445,0.051,212.495,0.052,1.00
+opt-13b,644,12853473280,dual_perturb,D,Per-tensor + Triton fused (N launches),55.235,0.024,55.276,0.026,3.85
+opt-13b,644,12853473280,dual_perturb,F,Per-tensor + CUDA fused (N launches),85.833,0.071,85.880,0.071,2.48
+opt-13b,644,12853473280,dual_perturb,C,Flat buf + Triton fused (1 launch),53.525,0.044,53.567,0.047,3.97
+opt-13b,644,12853473280,dual_perturb,E,Flat buf + CUDA fused (1 launch),83.930,0.087,83.977,0.088,2.53
+opt-13b,644,12853473280,dual_forward,A,Per-tensor dual-forward (baseline),424.023,0.058,424.074,0.059,1.00
+opt-13b,644,12853473280,dual_forward,D,Per-tensor + Triton combined (N launches),94.795,0.080,94.846,0.081,4.47
+opt-13b,644,12853473280,dual_forward,F,Per-tensor + CUDA combined (N launches),170.025,0.072,170.077,0.076,2.49
+opt-13b,644,12853473280,dual_forward,C,Flat buf + Triton combined (1 launch),91.627,0.057,91.676,0.058,4.63
+opt-13b,644,12853473280,dual_forward,E,Flat buf + CUDA combined (1 launch),167.692,0.107,167.738,0.108,2.53
